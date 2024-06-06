@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2023 Kevin Buzeau
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package com.buzbuz.smartautoclicker.activity
 
 import android.content.ActivityNotFoundException
@@ -42,21 +26,19 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.gpt40.smartautoclicker.R
 import dagger.hilt.android.AndroidEntryPoint
 
-/**
- * Entry point activity for the application.
- * Shown when the user clicks on the launcher icon for the application, this activity will displays the list of
- * available scenarios, if any.
- */
+
 @AndroidEntryPoint
 class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
 
-    /** ViewModel providing the click scenarios data to the UI. */
+    /** 提供点击场景数据给UI的ViewModel。 */
+
     private val scenarioViewModel: ScenarioViewModel by viewModels()
 
-    /** The result launcher for the projection permission dialog. */
+    /** 投屏权限对话框的结果启动器。 */
+
     private lateinit var projectionActivityResult: ActivityResultLauncher<Intent>
 
-    /** Scenario clicked by the user. */
+    /** 用户点击的场景。 */
     private var requestedItem: ScenarioListUiState.Item? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,6 +47,8 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
 
         scenarioViewModel.stopScenario()
         scenarioViewModel.requestUserConsent(this)
+
+        // 获取权限
 
         projectionActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode != RESULT_OK) {

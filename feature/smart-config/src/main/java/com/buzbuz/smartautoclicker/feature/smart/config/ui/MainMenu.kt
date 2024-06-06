@@ -183,11 +183,6 @@ class MainMenu(private val onStopClicked: () -> Unit) : OverlayMenu() {
     }
 
     private fun onPlayPauseClicked() {
-        if (viewModel.shouldShowStopVolumeDownTutorialDialog()) {
-            showStopVolumeDownTutorialDialog()
-            return
-        }
-
         viewModel.toggleDetection(context)
     }
 
@@ -298,18 +293,6 @@ class MainMenu(private val onStopClicked: () -> Unit) : OverlayMenu() {
             .showAsOverlay()
     }
 
-    private fun showStopVolumeDownTutorialDialog() {
-        MaterialAlertDialogBuilder(DynamicColors.wrapContextIfAvailable(ContextThemeWrapper(context, R.style.AppTheme)))
-            .setTitle(R.string.dialog_title_tutorial)
-            .setMessage(R.string.message_tutorial_volume_down_stop)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                onPlayPauseClicked()
-            }
-            .create()
-            .showAsOverlay()
-
-        viewModel.onStopVolumeDownTutorialDialogShown()
-    }
 
     private fun showNativeLibErrorDialogIfNeeded(haveError: Boolean) {
         if (!haveError) return

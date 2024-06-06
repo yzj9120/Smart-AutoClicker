@@ -149,7 +149,8 @@ class ScenarioViewModel @Inject constructor(
         return true
     }
 
-    /** Stop the overlay UI and release all associated resources. */
+    /**停止覆盖UI并释放所有关联的资源*/
+
     fun stopScenario() {
         clickerService?.stop()
     }

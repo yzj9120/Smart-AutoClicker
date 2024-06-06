@@ -164,11 +164,6 @@ class DumbMainMenu(
     }
 
     private fun onPlayPauseClicked() {
-        if (viewModel.shouldShowStopVolumeDownTutorialDialog()) {
-            showStopVolumeDownTutorialDialog()
-            return
-        }
-
         viewModel.toggleScenarioPlay()
     }
 
@@ -197,16 +192,4 @@ class DumbMainMenu(
         }
     }
 
-    private fun showStopVolumeDownTutorialDialog() {
-        MaterialAlertDialogBuilder(DynamicColors.wrapContextIfAvailable(ContextThemeWrapper(context, R.style.AppTheme)))
-            .setTitle(R.string.dialog_title_tutorial)
-            .setMessage(R.string.message_tutorial_volume_down_stop)
-            .setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int ->
-                onPlayPauseClicked()
-            }
-            .create()
-            .showAsOverlay()
-
-        viewModel.onStopVolumeDownTutorialDialogShown()
-    }
 }

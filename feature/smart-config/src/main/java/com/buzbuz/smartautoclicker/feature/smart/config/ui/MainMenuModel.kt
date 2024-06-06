@@ -32,8 +32,6 @@ import com.buzbuz.smartautoclicker.core.ui.monitoring.MonitoredViewsManager
 import com.buzbuz.smartautoclicker.core.ui.monitoring.ViewPositioningType
 import com.buzbuz.smartautoclicker.core.ui.monitoring.MonitoredViewType
 import com.buzbuz.smartautoclicker.feature.revenue.UserBillingState
-import com.buzbuz.smartautoclicker.feature.tutorial.domain.TutorialRepository
-
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -53,7 +51,6 @@ import javax.inject.Inject
 class MainMenuModel @Inject constructor(
     private val detectionRepository: DetectionRepository,
     private val editionRepository: EditionRepository,
-    private val tutorialRepository: TutorialRepository,
     private val revenueRepository: IRevenueRepository,
     private val monitoredViewsManager: MonitoredViewsManager,
     private val debugRepository: DebuggingRepository,
@@ -184,13 +181,6 @@ class MainMenuModel @Inject constructor(
             detach(MonitoredViewType.FLOATING_MENU_BUTTON_CONFIG)
         }
     }
-
-    fun shouldShowStopVolumeDownTutorialDialog(): Boolean =
-        !tutorialRepository.isTutorialStopVolumeDownPopupShown()
-
-    fun onStopVolumeDownTutorialDialogShown(): Unit =
-        tutorialRepository.setIsTutorialStopVolumeDownPopupShown()
-
     private fun UserBillingState.isAdRequested(): Boolean =
         this == UserBillingState.AD_REQUESTED
 }
