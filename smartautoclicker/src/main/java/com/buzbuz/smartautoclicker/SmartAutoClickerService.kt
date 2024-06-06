@@ -60,20 +60,9 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 /**
- * AccessibilityService implementation for the SmartAutoClicker.
- *
- * Started automatically by Android once the user has defined this service has an accessibility service, it provides
- * an API to start and stop the DetectorEngine correctly in order to display the overlay UI and record the screen for
- * clicks detection.
- * This API is offered through the [LocalService] class, which is instantiated in the [LOCAL_SERVICE_INSTANCE] object.
- * This system is used instead of the usual binder interface because an [AccessibilityService] already has its own
- * binder and it can't be changed. To access this local service, use [getLocalService].
- *
- * We need this service to be an accessibility service in order to inject the detected event on the currently
- * displayed activity. This injection is made by the [dispatchGesture] method, which is called everytime an event has
- * been detected.
+ * 一个 Android 无障碍服务（AccessibilityService）。该服务用于实现智能自动点击功能
  */
-@AndroidEntryPoint
+@AndroidEntryPoint //注解用于指示 Dagger Hilt 进行依赖注入。
 class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
 
     companion object {
