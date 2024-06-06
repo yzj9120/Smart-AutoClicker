@@ -49,9 +49,6 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
         setContentView(R.layout.activity_scenario)
 
 
-        Log.d(TAG, "onCreate:============")
-
-
         scenarioViewModel.stopScenario()
         scenarioViewModel.requestUserConsent(this)
 
@@ -59,6 +56,11 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
 
         projectionActivityResult =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+
+                Log.d(TAG, "projectionActivityResult:============")
+
+
+
                 if (result.resultCode != RESULT_OK) {
                     Toast.makeText(this, R.string.toast_denied_screen_sharing_permission, Toast.LENGTH_SHORT).show()
                 } else {
@@ -80,8 +82,9 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
     }
 
     override fun startScenario(item: ScenarioListUiState.Item) {
-        Log.d(TAG, "startScenario:$item")
+        Log.d(TAG, "startScenario***********:$item")
         requestedItem = item
+        /// 检测权限
         scenarioViewModel.startPermissionFlowIfNeeded(
             activity = this,
             onAllGranted = ::onMandatoryPermissionsGranted,
@@ -90,7 +93,7 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
 
     ///处理所有必要权限被授予的情况。它在需要时启动故障排除流程，然后启动适当的场景。
     private fun onMandatoryPermissionsGranted() {
-        Log.d(TAG, "onMandatoryPermissionsGranted:")
+        Log.d(TAG, "onMandatoryPermissionsGranted:****")
 
         scenarioViewModel.startTroubleshootingFlowIfNeeded(this) {
             when (val scenario = requestedItem?.scenario) {

@@ -95,6 +95,9 @@ class ScenarioViewModel @Inject constructor(
         revenueRepository.refreshPurchases()
     }
 
+    /**
+     * 获取悬浮权限
+     */
     fun startPermissionFlowIfNeeded(activity: AppCompatActivity, onAllGranted: () -> Unit) {
         permissionController.startPermissionsUiFlow(
             activity = activity,
