@@ -180,6 +180,8 @@ internal class RevenueRepository @Inject constructor(
     }
 
     override fun refreshPurchases() {
+
+        Log.d(TAG, "User refreshPurchases")
         coroutineScopeIo.launch {
             billingDataSource.refreshPurchases()
         }

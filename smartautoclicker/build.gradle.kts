@@ -11,7 +11,6 @@ android {
 
     defaultConfig {
         applicationId = "com.gpt40.smartautoclicker"
-
         versionCode = 44
         versionName = "3.0.0-beta03"
     }
@@ -25,14 +24,14 @@ android {
             dimension = "version"
         }
     }
-
-    if (buildParameters.isBuildForVariant("fDroidDebug")) {
-        buildTypes {
-            debug {
-                applicationIdSuffix = ".debug"
-            }
-        }
-    }
+//
+//    if (buildParameters.isBuildForVariant("fDroidDebug")) {
+//        buildTypes {
+//            debug {
+//                applicationIdSuffix = ".debug"
+//            }
+//        }
+//    }
 
     signingConfigs {
         create("release") {
@@ -48,9 +47,9 @@ android {
 apply { plugin(libs.plugins.buzbuz.androidSigning.get().pluginId) }
 
 // Only apply gms/firebase plugins if we are building for the play store
-if (buildParameters.isBuildForVariant("playStoreRelease")) {
-    apply { plugin(libs.plugins.buzbuz.crashlytics.get().pluginId) }
-}
+//if (buildParameters.isBuildForVariant("playStoreRelease")) {
+//    apply { plugin(libs.plugins.buzbuz.crashlytics.get().pluginId) }
+//}
 
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
