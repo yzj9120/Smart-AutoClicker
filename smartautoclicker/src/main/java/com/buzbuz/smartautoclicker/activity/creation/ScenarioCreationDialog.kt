@@ -29,7 +29,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 
-import com.buzbuz.smartautoclicker.R
 import com.buzbuz.smartautoclicker.core.ui.bindings.dialogs.DialogNavigationButton
 import com.buzbuz.smartautoclicker.core.ui.bindings.dialogs.setButtonEnabledState
 import com.buzbuz.smartautoclicker.core.ui.bindings.fields.setError
@@ -38,11 +37,12 @@ import com.buzbuz.smartautoclicker.core.ui.bindings.fields.setOnTextChangedListe
 import com.buzbuz.smartautoclicker.core.ui.bindings.fields.setText
 import com.buzbuz.smartautoclicker.core.ui.databinding.IncludeDialogNavigationTopBarBinding
 import com.buzbuz.smartautoclicker.core.ui.databinding.IncludeFieldTextInputBinding
-import com.buzbuz.smartautoclicker.databinding.DialogScenarioCreationBinding
-import com.buzbuz.smartautoclicker.databinding.IncludeScenarioTypeViewBinding
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.gpt40.smartautoclicker.R
+import com.gpt40.smartautoclicker.databinding.DialogScenarioCreationBinding
+import com.gpt40.smartautoclicker.databinding.IncludeScenarioTypeViewBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 import kotlinx.coroutines.launch

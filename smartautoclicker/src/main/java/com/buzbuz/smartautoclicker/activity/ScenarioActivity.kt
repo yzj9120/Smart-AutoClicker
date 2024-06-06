@@ -31,7 +31,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
-import com.buzbuz.smartautoclicker.R
 import com.buzbuz.smartautoclicker.activity.list.ScenarioListFragment
 import com.buzbuz.smartautoclicker.activity.list.ScenarioListUiState
 import com.buzbuz.smartautoclicker.core.base.extensions.delayDrawUntil
@@ -40,6 +39,7 @@ import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbScenario
 import com.buzbuz.smartautoclicker.feature.revenue.UserConsentState
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.gpt40.smartautoclicker.R
 import dagger.hilt.android.AndroidEntryPoint
 
 /**

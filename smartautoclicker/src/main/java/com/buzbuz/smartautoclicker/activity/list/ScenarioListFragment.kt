@@ -34,14 +34,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 
-import com.buzbuz.smartautoclicker.R
 import com.buzbuz.smartautoclicker.activity.creation.ScenarioCreationDialog
 import com.buzbuz.smartautoclicker.feature.backup.ui.BackupDialogFragment.Companion.FRAGMENT_TAG_BACKUP_DIALOG
-import com.buzbuz.smartautoclicker.databinding.FragmentScenariosBinding
 import com.buzbuz.smartautoclicker.feature.backup.ui.BackupDialogFragment
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.shape.MaterialShapeDrawable
+import com.gpt40.smartautoclicker.R
+import com.gpt40.smartautoclicker.databinding.FragmentScenariosBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 import kotlinx.coroutines.launch

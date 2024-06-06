@@ -50,6 +50,7 @@ import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbScenario
 import com.buzbuz.smartautoclicker.core.dumb.engine.DumbEngine
 import com.buzbuz.smartautoclicker.core.processing.domain.DetectionRepository
 import com.buzbuz.smartautoclicker.feature.revenue.IRevenueRepository
+import com.gpt40.smartautoclicker.R
 
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.FileDescriptor
