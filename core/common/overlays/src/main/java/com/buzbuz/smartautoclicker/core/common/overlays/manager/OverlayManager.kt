@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2024 Kevin Buzeau
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package com.buzbuz.smartautoclicker.core.common.overlays.manager
 
 import android.content.Context
@@ -42,24 +26,25 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Manages the overlays navigation and backstack.
- * Can be seen as the equivalent of the Android FragmentManager, but for [Overlay].
+ * 用于管理和控制 Android 应用程序中的覆盖层 (Overlay)
  */
 @Singleton
 class OverlayManager @Inject internal constructor(
     private val displayMetrics: DisplayMetrics,
     private val menuPositionDataSource: OverlayMenuPositionDataSource,
 ): Dumpable {
-    /** The listener upon screen rotation. */
+    /**监听屏幕上旋转*/
     private val orientationListener: (Context) -> Unit = { onOrientationChanged() }
 
-    /** Contains all overlays, from root to top visible overlay. */
+    /**包含所有覆盖，从根到顶部可见覆盖*/
+
     private val overlayBackStack: LifoStack<Overlay> = LifoStack()
-    /** The stack containing the navigation requests. */
+    /**包含导航请求的堆栈*/
+
     private val overlayNavigationRequestStack = OverlayNavigationRequestStack()
     /**
-     * Keep track of all overlay lifecycle state in the back stack when required.
-     * Useful when you need to save the state of the ui, change it and then restore its previous state.
+     *必要时，跟踪后堆栈中的所有覆盖生命周期状态。
+     *当您需要保存ui的状态，更改它，然后恢复它以前的状态时，这很有用。
      */
     private val lifecyclesRegistry = LifecycleStatesRegistry()
 

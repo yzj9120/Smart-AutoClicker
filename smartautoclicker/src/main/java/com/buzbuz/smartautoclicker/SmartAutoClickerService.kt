@@ -67,34 +67,34 @@ import kotlin.coroutines.suspendCoroutine
 class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
 
     companion object {
-        /** The identifier for the foreground notification of this service. */
+        /**此服务的前台通知的标识符*/
         private const val NOTIFICATION_ID = 42
-        /** The channel identifier for the foreground notification of this service. */
+        /**此服务的前台通知的通道标识符*/
         private const val NOTIFICATION_CHANNEL_ID = "SmartAutoClickerService"
 
-        /** Actions from the notification. */
+        /**通知中的操作*/
         private const val INTENT_ACTION_TOGGLE_OVERLAY = "com.buzbuz.smartautoclicker.ACTION_TOGGLE_OVERLAY_VISIBILITY"
         private const val INTENT_ACTION_STOP_SCENARIO = "com.buzbuz.smartautoclicker.ACTION_STOP_SCENARIO"
+        /**[ILocalService]的实例，为该服务提供对“活动”的访问权限*/
 
-        /** The instance of the [ILocalService], providing access for this service to the Activity. */
         private var LOCAL_SERVICE_INSTANCE: ILocalService? = null
             set(value) {
                 field = value
                 LOCAL_SERVICE_CALLBACK?.invoke(field)
             }
-        /** Callback upon the availability of the [LOCAL_SERVICE_INSTANCE]. */
         private var LOCAL_SERVICE_CALLBACK: ((ILocalService?) -> Unit)? = null
             set(value) {
                 field = value
                 value?.invoke(LOCAL_SERVICE_INSTANCE)
             }
 
+
         /**
-         * Static method allowing an activity to register a callback in order to monitor the availability of the
-         * [ILocalService]. If the service is already available upon registration, the callback will be immediately
-         * called.
+         *静态方法，允许活动注册回调以监视的可用性
+         *[ILocalService]。如果该服务在注册时已经可用，则会立即进行回调
+         *调用。
          *
-         * @param stateCallback the object to be notified upon service availability.
+         *@param state在服务可用时回调要通知的对象。
          */
         fun getLocalService(stateCallback: ((ILocalService?) -> Unit)?) {
             LOCAL_SERVICE_CALLBACK = stateCallback
@@ -114,10 +114,14 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
     private val localService: LocalService?
         get() = LOCAL_SERVICE_INSTANCE as? LocalService
 
+    ///覆盖层
     @Inject lateinit var overlayManager: OverlayManager
+    ///屏幕相关
     @Inject lateinit var displayMetrics: DisplayMetrics
+    ///
     @Inject lateinit var detectionRepository: DetectionRepository
     @Inject lateinit var dumbEngine: DumbEngine
+    ////**管理单击条件的位图*/
     @Inject lateinit var bitmapManager: IBitmapManager
     @Inject lateinit var qualityRepository: QualityRepository
     @Inject lateinit var qualityMetricsMonitor: QualityMetricsMonitor
@@ -128,6 +132,9 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
     /** Receives commands from the notification. */
     private var notificationActionsReceiver : BroadcastReceiver? = null
 
+    /**
+     * 方法在服务连接时调用，初始化和配置服务
+     */
     override fun onServiceConnected() {
         super.onServiceConnected()
 
@@ -169,6 +176,9 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
         )
     }
 
+    /**
+     * 断开
+     */
     override fun onUnbind(intent: Intent?): Boolean {
         notificationActionsReceiver?.let { unregisterReceiver(it) }
         notificationActionsReceiver = null
@@ -181,9 +191,15 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
         return super.onUnbind(intent)
     }
 
+    /**
+     * 处理按键事件
+     */
     override fun onKeyEvent(event: KeyEvent?): Boolean =
         localService?.onKeyEvent(event) ?: super.onKeyEvent(event)
 
+    /**
+     * 创建通知渠道
+     */
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             getSystemService(NotificationManager::class.java)?.createNotificationChannel(
@@ -197,9 +213,9 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
     }
 
     /**
-     * Create the notification for this service allowing it to be set as foreground service.
+     *创建此服务的通知，允许将其设置为前台服务。
      *
-     * @return the newly created notification.
+     *@返回新建的通知。
      */
     private fun createNotification(): Notification {
         val intent = Intent(this, ScenarioActivity::class.java)
@@ -245,6 +261,9 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
             }
         }
 
+    /**
+     * 执行手势操作
+     */
     override suspend fun executeGesture(gestureDescription: GestureDescription) {
         suspendCoroutine<Unit?> { continuation ->
             dispatchGesture(
@@ -261,6 +280,9 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
         }
     }
 
+    /**
+     * 启动活动
+     */
     override fun executeStartActivity(intent: Intent) {
         try {
             startActivity(intent)
@@ -271,6 +293,9 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
         }
     }
 
+    /**
+     * 发送广播
+     */
     override fun executeSendBroadcast(intent: Intent) {
         try {
             sendBroadcast(intent)
@@ -280,8 +305,8 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
     }
 
     /**
-     * Dump the state of the service via adb.
-     * adb shell "dumpsys activity service com.buzbuz.smartautoclicker"
+     *通过adb转储服务的状态。
+     *adb shell“dumpsys活动服务com.buzbuz.smartautoclicker”
      */
     override fun dump(fd: FileDescriptor?, writer: PrintWriter?, args: Array<out String>?) {
         if (writer == null) return
