@@ -31,8 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 /**
- * Fragment displaying the list of click scenario and the creation dialog.
- * If the list is empty, it will hide the list and displays the empty list view.
+ * 场景列表和创建对话框
  */
 @AndroidEntryPoint
 class ScenarioListFragment : Fragment() {
@@ -41,16 +40,13 @@ class ScenarioListFragment : Fragment() {
         fun startScenario(item: ScenarioListUiState.Item)
     }
 
-    /** ViewModel providing the scenarios data to the UI. */
     private val scenarioListViewModel: ScenarioListViewModel by viewModels()
 
-    /** ViewBinding containing the views for this fragment. */
     private lateinit var viewBinding: FragmentScenariosBinding
-    /** Adapter displaying the click scenarios as a list. */
+
     private lateinit var scenariosAdapter: ScenarioAdapter
 
 
-    /** The current dialog being displayed. Null if not displayed. */
     private var dialog: AlertDialog? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -58,6 +54,7 @@ class ScenarioListFragment : Fragment() {
         return viewBinding.root
     }
 
+    ///初始化适配器，并设置各类点击事件的处理方法。
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -69,18 +66,26 @@ class ScenarioListFragment : Fragment() {
         )
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        /**
+         * 设置视图绑定和点击事件监听器。
+         */
         viewBinding.apply {
             list.adapter = scenariosAdapter
 
             emptyCreateButton.setOnClickListener { onCreateClicked() }
             add.setOnClickListener { onCreateClicked() }
 
-            appBarLayout.statusBarForeground = MaterialShapeDrawable.createWithElevationOverlay(context)
+//            appBarLayout.statusBarForeground = MaterialShapeDrawable.createWithElevationOverlay(context)
             topAppBar.setOnMenuItemClickListener { onMenuItemSelected(it) }
         }
+
+        /**
+         * 启动一个协程收集 uiState 的变化，并调用 updateUiState 方法进行 UI 更新。
+         */
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -89,6 +94,10 @@ class ScenarioListFragment : Fragment() {
         }
     }
 
+    /**
+     * 处理菜单项的点击事件，根据不同的菜单项执行不同的操作。
+     *
+     */
     private fun onMenuItemSelected(item: MenuItem): Boolean {
         val uiState = scenarioListViewModel.uiState.value ?: return false
 
@@ -99,6 +108,7 @@ class ScenarioListFragment : Fragment() {
                     smartScenariosToBackup = scenarioListViewModel.getSmartScenariosSelectedForBackup(),
                     dumbScenariosToBackup = scenarioListViewModel.getDumbScenariosSelectedForBackup(),
                 )
+
                 else -> scenarioListViewModel.setUiState(ScenarioListUiState.Type.EXPORT)
             }
 
@@ -115,6 +125,10 @@ class ScenarioListFragment : Fragment() {
         return true
     }
 
+    /**
+     * 更新 UI 状态，包括菜单和场景列表。
+     *
+     */
     private fun updateUiState(uiState: ScenarioListUiState?) {
         uiState ?: return
 
@@ -123,8 +137,8 @@ class ScenarioListFragment : Fragment() {
     }
 
     /**
-     * Update the display of the action menu.
-     * @param menuState the new ui state for the menu.
+     * 更新菜单项的状态和行为。
+     *
      */
     private fun updateMenu(menuState: ScenarioListUiState.Menu) {
         viewBinding.topAppBar.menu.apply {
@@ -162,8 +176,7 @@ class ScenarioListFragment : Fragment() {
     }
 
     /**
-     * Observer upon the list of click scenarios.
-     * Will update the list/empty view according to the current click scenarios
+     * 更新场景列表的显示状态，根据内容是否为空显示或隐藏相关视图。
      */
     private fun updateScenarioList(uiState: ScenarioListUiState) {
         viewBinding.apply {
@@ -179,14 +192,14 @@ class ScenarioListFragment : Fragment() {
             }
         }
 
+
+        Log.d("model_list", ": ${uiState.listContent}");
         scenariosAdapter.submitList(uiState.listContent)
     }
 
     /**
-     * Show an AlertDialog from this fragment.
-     * This method will ensure that only one dialog is shown at the same time.
+     * 显示一个对话框，并确保同时只有一个对话框显示。
      *
-     * @param newDialog the new dialog to be shown.
      */
     private fun showDialog(newDialog: AlertDialog) {
         dialog.let {
@@ -201,7 +214,7 @@ class ScenarioListFragment : Fragment() {
     }
 
     /**
-     * Called when the user clicks on a scenario.
+     *  启动
      * @param scenario the scenario clicked.
      */
     private fun onStartClicked(scenario: ScenarioListUiState.Item) {
@@ -209,7 +222,7 @@ class ScenarioListFragment : Fragment() {
     }
 
     /**
-     * Called when the user clicks on the export button of a scenario.
+     *  导入
      *
      * @param item the scenario clicked.
      */
@@ -218,37 +231,30 @@ class ScenarioListFragment : Fragment() {
     }
 
     /**
-     * Called when the user clicks on the add scenario button.
+     * 创建
      * Create and show the [dialog]. Upon Ok press, creates the scenario.
      */
     private fun onCreateClicked() {
-        ScenarioCreationDialog()
-            .show(requireActivity().supportFragmentManager, ScenarioCreationDialog.FRAGMENT_TAG)
+        ScenarioCreationDialog().show(requireActivity().supportFragmentManager, ScenarioCreationDialog.FRAGMENT_TAG)
     }
 
     /**
-     * Called when the user clicks on the delete button of a scenario.
-     * Create and show the [dialog]. Upon Ok press, delete the scenario.
+     * 删除
      *
      * @param item the scenario to delete.
      */
     private fun onDeleteClicked(item: ScenarioListUiState.Item) {
-        showDialog(MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_title_delete_scenario)
-            .setMessage(resources.getString(R.string.message_delete_scenario, item.displayName))
-            .setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int ->
-                scenarioListViewModel.deleteScenario(item)
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .create())
+        showDialog(
+            MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.dialog_title_delete_scenario)
+                .setMessage(resources.getString(R.string.message_delete_scenario, item.displayName))
+                .setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int ->
+                    scenarioListViewModel.deleteScenario(item)
+                }.setNegativeButton(android.R.string.cancel, null).create()
+        )
     }
 
     /**
-     * Shows the backup dialog fragment.
-     *
-     * @param isImport true to display in import mode, false for export.
-     * @param smartScenariosToBackup the list of identifiers for the smart scenarios to export. Null if isImport = true.
-     * @param dumbScenariosToBackup the list of identifiers for the dumb scenarios to export. Null if isImport = true.
+     * 显示备份对话框，根据 isImport 参数决定是导入模式还是导出模式。
      *
      */
     private fun showBackupDialog(
@@ -257,14 +263,16 @@ class ScenarioListFragment : Fragment() {
         dumbScenariosToBackup: Collection<Long>? = null,
     ) {
         activity?.let {
-            BackupDialogFragment
-                .newInstance(isImport, smartScenariosToBackup, dumbScenariosToBackup)
+            BackupDialogFragment.newInstance(isImport, smartScenariosToBackup, dumbScenariosToBackup)
                 .show(it.supportFragmentManager, FRAGMENT_TAG_BACKUP_DIALOG)
         }
         scenarioListViewModel.setUiState(ScenarioListUiState.Type.SELECTION)
     }
 }
 
+/**
+ * 更新 MenuItem 的状态，包括可见性、启用状态和图
+ */
 private fun MenuItem.bind(state: ScenarioListUiState.Menu.Item) {
     isVisible = state.visible
     isEnabled = state.enabled

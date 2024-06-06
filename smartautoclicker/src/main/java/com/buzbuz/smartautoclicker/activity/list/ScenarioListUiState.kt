@@ -88,7 +88,7 @@ data class ScenarioListUiState(
             ),
             privacyItemState = Item(privacyRequired),
             purchaseItemState = Item(canPurchase),
-            troubleshootingItemState = Item(true),
+            troubleshootingItemState = Item(false),
         )
     }
 
