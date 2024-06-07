@@ -35,7 +35,7 @@ class ScenarioCreationViewModel @Inject constructor(
     private val smartRepository: IRepository,
     private val dumbRepository: IDumbRepository,
 ) : ViewModel() {
-    private val TAG = "HUANGZHEN:ScenarioCreationViewModel:"
+    private val TAG = "Hz:ScenarioCreationViewModel:"
 
     private val _name: MutableStateFlow<String?> =
         MutableStateFlow(context.getString(R.string.default_scenario_name))

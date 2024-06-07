@@ -63,7 +63,7 @@ class ScenarioViewModel @Inject constructor(
     private val permissionController: PermissionsController,
     ) : ViewModel() {
 
-    private val TAG = "HUANGZHEN:ScenarioViewModel:"
+    private val TAG = "Hz:ScenarioViewModel:"
 
 
     /** Callback upon the availability of the [SmartAutoClickerService]. */

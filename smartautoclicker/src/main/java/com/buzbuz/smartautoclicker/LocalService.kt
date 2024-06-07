@@ -43,7 +43,7 @@ import kotlinx.coroutines.launch
 
 class LocalService(
     private val context: Context,
-    private val overlayManager: OverlayManager,
+    private val overlayManager: OverlayManager,  // 悬浮层
     private val displayMetrics: DisplayMetrics,
     private val detectionRepository: DetectionRepository,
     private val bitmapManager: IBitmapManager,
@@ -54,13 +54,15 @@ class LocalService(
 ) : SmartAutoClickerService.ILocalService {
 
 
-    private  val TAG = "HUANGZHEN:LocalService:"
+    private val TAG = "Hz:LocalService:"
 
 
     /** Scope for this LocalService. */
     private val serviceScope: CoroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
     /** Coroutine job for the delayed start of engine & ui. */
     private var startJob: Job? = null
+
     /** True if the overlay is started, false if not. */
     internal var isStarted: Boolean = false
 

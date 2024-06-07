@@ -36,7 +36,7 @@ class ScenarioAdapter(
 ) : ListAdapter<ScenarioListUiState.Item, RecyclerView.ViewHolder>(ScenarioDiffUtilCallback) {
 
 
-    private val TAG = "HUANGZHEN:ScenarioAdapter:"
+    private val TAG = "Hz:ScenarioAdapter:"
 
 
     override fun getItemViewType(position: Int): Int {

@@ -31,7 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
 
-    private  val TAG = "HUANGZHEN:ScenarioActivity:"
+    private  val TAG = "Hz:ScenarioActivity:"
 
     /** 提供点击场景数据给UI的ViewModel。 */
 

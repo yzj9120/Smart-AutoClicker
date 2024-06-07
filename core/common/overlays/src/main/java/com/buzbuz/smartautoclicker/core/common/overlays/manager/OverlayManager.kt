@@ -321,4 +321,4 @@ class OverlayManager @Inject internal constructor(
 }
 
 /** Tag for logs. */
-private const val TAG = "OverlayManager"
+private const val TAG = "Hz:OverlayManager"
