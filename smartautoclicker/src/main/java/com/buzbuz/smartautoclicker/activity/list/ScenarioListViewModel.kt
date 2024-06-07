@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.buzbuz.smartautoclicker.core.base.identifier.DATABASE_ID_INSERTION
+import com.buzbuz.smartautoclicker.core.base.identifier.Identifier
 
 import com.buzbuz.smartautoclicker.core.common.quality.domain.QualityRepository
 import com.buzbuz.smartautoclicker.core.domain.IRepository
@@ -92,11 +94,11 @@ class ScenarioListViewModel @Inject constructor(
      */
     private val filteredScenarios: Flow<List<ScenarioListUiState.Item>> =
         allScenarios.combine(searchQuery) { scenarios, query ->
-                scenarios.mapNotNull { scenario ->
-                    if (query.isNullOrEmpty()) return@mapNotNull scenario
-                    if (scenario.displayName.contains(query.toString(), true)) scenario else null
-                }
+            scenarios.mapNotNull { scenario ->
+                if (query.isNullOrEmpty()) return@mapNotNull scenario
+                if (scenario.displayName.contains(query.toString(), true)) scenario else null
             }
+        }
 
     /**
      * 这是一个 MutableStateFlow，持有一个 ScenarioBackupSelection 对象。
@@ -164,6 +166,11 @@ class ScenarioListViewModel @Inject constructor(
      * @param state the new state.
      */
     fun setUiState(state: ScenarioListUiState.Type) {
+
+        Log.d(
+            TAG, "setUiState =$state"
+        )
+
         uiStateType.value = state
         selectedForBackup.value = selectedForBackup.value.copy(
             dumbSelection = emptySet(),
@@ -179,24 +186,32 @@ class ScenarioListViewModel @Inject constructor(
         searchQuery.value = query
     }
 
-    /** @return the list of selected dumb scenario identifiers. */
+    /**
+     * 坐标定位 列表
+     */
     fun getDumbScenariosSelectedForBackup(): Collection<Long> = selectedForBackup.value.dumbSelection.toList()
 
-    /** @return the list of selected smart scenario identifiers. */
+    /**
+     * 图像检测列表
+     */
     fun getSmartScenariosSelectedForBackup(): Collection<Long> = selectedForBackup.value.smartSelection.toList()
 
     /**
-     * Toggle the selected for backup state of a scenario.
+     * 切换场景的选定备份状态。
      * @param scenario the scenario to be toggled.
      */
     fun toggleScenarioSelectionForBackup(scenario: ScenarioListUiState.Item) {
+
+        Log.d(TAG, "toggleScenarioSelectionForBackup=$scenario")
         selectedForBackup.value.toggleScenarioSelectionForBackup(scenario)?.let {
             selectedForBackup.value = it
         }
     }
 
-    /** Toggle the selected for backup state value for all scenario. */
+    /** 切换所有方案的所选备份状态值. */
     fun toggleAllScenarioSelectionForBackup() {
+        Log.d(TAG, "toggleAllScenarioSelectionForBackup")
+
         selectedForBackup.value = selectedForBackup.value.toggleAllScenarioSelectionForBackup(
             uiState.value?.listContent ?: emptyList()
         )
@@ -210,6 +225,9 @@ class ScenarioListViewModel @Inject constructor(
      * @param item the scenario to be deleted.
      */
     fun deleteScenario(item: ScenarioListUiState.Item) {
+        Log.d(TAG, "deleteScenario=$item")
+
+
         viewModelScope.launch(Dispatchers.IO) {
             when (val scenario = item.scenario) {
                 is DumbScenario -> dumbRepository.deleteDumbScenario(scenario)
@@ -219,24 +237,40 @@ class ScenarioListViewModel @Inject constructor(
     }
 
     /**
-     * Get the bitmap corresponding to a condition.
-     * Loading is async and the result notified via the onBitmapLoaded argument.
+     *获取与条件对应的位图。
+     *加载是异步的，结果通过onBitmapLoaded参数通知。
      *
      * @param condition the condition to load the bitmap of.
      * @param onBitmapLoaded the callback notified upon completion.
      */
-    fun getConditionBitmap(condition: ImageCondition, onBitmapLoaded: (Bitmap?) -> Unit): Job =
-        getImageConditionBitmap(smartRepository, condition, onBitmapLoaded)
+    fun getConditionBitmap(condition: ImageCondition, onBitmapLoaded: (Bitmap?) -> Unit): Job {
+
+        Log.d(TAG, "getConditionBitmap=$condition......$onBitmapLoaded")
+
+
+        return getImageConditionBitmap(smartRepository, condition, onBitmapLoaded);
+    }
+
 
     fun showPrivacySettings(activity: Activity) {
+        Log.d(TAG, "showPrivacySettings=")
+
         revenueRepository.startPrivacySettingUiFlow(activity)
     }
 
     fun showPurchaseActivity(context: Context) {
+        Log.d(TAG, "showPurchaseActivity=")
+
         revenueRepository.startPurchaseUiFlow(context)
     }
 
+    /**
+     * 故障排除 弹窗提示
+     */
     fun showTroubleshootingDialog(activity: FragmentActivity) {
+
+        Log.d(TAG, "showTroubleshootingDialog=")
+
         qualityRepository.startTroubleshootingUiFlow(activity)
     }
 
@@ -245,22 +279,33 @@ class ScenarioListViewModel @Inject constructor(
         backupSelection: ScenarioBackupSelection,
         billingState: UserBillingState,
         isPrivacyRequired: Boolean,
-    ): ScenarioListUiState.Menu = when (this) {
-        ScenarioListUiState.Type.SEARCH -> ScenarioListUiState.Menu.Search
-        ScenarioListUiState.Type.EXPORT -> ScenarioListUiState.Menu.Export(
-            canExport = !backupSelection.isEmpty(),
-        )
+    ): ScenarioListUiState.Menu {
 
-        ScenarioListUiState.Type.SELECTION -> ScenarioListUiState.Menu.Selection(
-            searchEnabled = scenarioItems.isNotEmpty(),
-            exportEnabled = scenarioItems.firstOrNull { it is ScenarioListUiState.Item.Valid } != null,
-            privacyRequired = isPrivacyRequired,
-            canPurchase = billingState != UserBillingState.PURCHASED,
-        )
+        Log.d(TAG, "toMenuUiState=$this")
+
+
+        return when (this) {
+            ScenarioListUiState.Type.SEARCH -> ScenarioListUiState.Menu.Search
+            ScenarioListUiState.Type.EXPORT -> ScenarioListUiState.Menu.Export(
+                canExport = !backupSelection.isEmpty(),
+            )
+
+            ScenarioListUiState.Type.SELECTION -> ScenarioListUiState.Menu.Selection(
+                searchEnabled = scenarioItems.isNotEmpty(),
+                exportEnabled = scenarioItems.firstOrNull { it is ScenarioListUiState.Item.Valid } != null,
+                privacyRequired = isPrivacyRequired,
+                canPurchase = billingState != UserBillingState.PURCHASED,
+            )
+        }
     }
 
-    private suspend fun Scenario.toItem(): ScenarioListUiState.Item =
-        if (eventCount == 0) ScenarioListUiState.Item.Empty.Smart(this)
+    private suspend fun Scenario.toItem(): ScenarioListUiState.Item {
+
+
+        Log.d(TAG, "Scenario.toItem=$this")
+
+
+        return if (eventCount == 0) ScenarioListUiState.Item.Empty.Smart(this)
         else ScenarioListUiState.Item.Valid.Smart(
             scenario = this,
             eventsItems = smartRepository.getImageEvents(id.databaseId).map { event ->
@@ -275,9 +320,16 @@ class ScenarioListViewModel @Inject constructor(
             triggerEventCount = smartRepository.getTriggerEvents(id.databaseId).size,
             detectionQuality = detectionQuality,
         )
+    }
 
-    private fun DumbScenario.toItem(context: Context): ScenarioListUiState.Item =
-        if (dumbActions.isEmpty()) ScenarioListUiState.Item.Empty.Dumb(this)
+
+    private fun DumbScenario.toItem(context: Context): ScenarioListUiState.Item {
+
+
+        Log.d(TAG, "DumbScenario.toItem=$this")
+
+
+        return if (dumbActions.isEmpty()) ScenarioListUiState.Item.Empty.Dumb(this)
         else ScenarioListUiState.Item.Valid.Dumb(
             scenario = this,
             clickCount = dumbActions.count { it is DumbAction.DumbClick },
@@ -286,6 +338,8 @@ class ScenarioListViewModel @Inject constructor(
             repeatText = getRepeatDisplayText(context),
             maxDurationText = getMaxDurationDisplayText(context),
         )
+    }
+
 
     private fun Repeatable.getRepeatDisplayText(context: Context): String =
         if (isRepeatInfinite) context.getString(R.string.item_desc_dumb_scenario_repeat_infinite)
@@ -301,6 +355,11 @@ class ScenarioListViewModel @Inject constructor(
     private fun List<ScenarioListUiState.Item>.filterForBackupSelection(
         backupSelection: ScenarioBackupSelection,
     ): List<ScenarioListUiState.Item> = mapNotNull { item ->
+
+
+        Log.d(TAG, "filterForBackupSelection.toItem=$this")
+
+
         when (item) {
             is ScenarioListUiState.Item.Valid.Dumb -> item.copy(
                 showExportCheckbox = true,
@@ -315,4 +374,49 @@ class ScenarioListViewModel @Inject constructor(
             else -> null
         }
     }
+
+    /**
+     *
+     * 一键添加数据 ：
+     * TODO
+     */
+    fun createDumAndSmart() {
+        viewModelScope.launch(Dispatchers.IO) {
+            createDumbScenario();
+            createSmartScenario();
+        }
+
+    }
+
+    /**
+     *
+     * [DumbClick(id=Identifier(databaseId=4, tempId=null), scenarioId=Identifier(databaseId=11, tempId=null), name=Click, priority=0, repeatCount=18, isRepeatInfinite=false, repeatDelayMs=5, position=Point(460, 1494), pressDurationMs=10)]
+     *
+     */
+    private suspend fun createDumbScenario() {
+        dumbRepository.addDumbScenario(
+            DumbScenario(
+                id = Identifier(databaseId = DATABASE_ID_INSERTION, tempId = 0L),
+                name = "坐标$DATABASE_ID_INSERTION",
+                dumbActions = emptyList(),    // 活动
+                repeatCount = 1, // 重复次数
+                isRepeatInfinite = false, //是否无限重复
+                maxDurationMin = 1,  // 最长延长时间 分钟
+                isDurationInfinite = true,
+                randomize = false, // 是否反作弊
+            )
+        )
+    }
+
+    private suspend fun createSmartScenario() {
+        smartRepository.addScenario(
+            Scenario(
+                id = Identifier(databaseId = DATABASE_ID_INSERTION, tempId = 0L),
+                name = "图形$DATABASE_ID_INSERTION",
+                detectionQuality = 1200,
+                randomize = false,
+            )
+        )
+    }
+
 }

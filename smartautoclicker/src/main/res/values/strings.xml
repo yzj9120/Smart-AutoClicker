@@ -33,6 +33,7 @@
     <string name="toast_denied_screen_sharing_permission" translatable="false">用户拒绝屏幕共享权限</string>
     <string name="toast_denied_foreground_permission" translatable="false">用户拒绝前台服务权限</string>
     <string name="button_text_create_scenario" translatable="false">创建场景</string>
+    <string name="button_onekey_create_scenario" translatable="false">一键创建</string>
     <string name="content_desc_add_scenario" translatable="false">创建一个新场景</string>
     <string name="default_scenario_name" translatable="false">默认名称</string>
     <string name="message_empty_image_events_scenario_list" translatable="false">No image events</string>

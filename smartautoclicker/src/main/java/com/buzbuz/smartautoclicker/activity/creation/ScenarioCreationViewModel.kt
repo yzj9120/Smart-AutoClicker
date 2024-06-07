@@ -1,7 +1,7 @@
-
 package com.buzbuz.smartautoclicker.activity.creation
 
 import android.content.Context
+import android.util.Log
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -35,6 +35,7 @@ class ScenarioCreationViewModel @Inject constructor(
     private val smartRepository: IRepository,
     private val dumbRepository: IDumbRepository,
 ) : ViewModel() {
+    private val TAG = "HUANGZHEN:ScenarioCreationViewModel:"
 
     private val _name: MutableStateFlow<String?> =
         MutableStateFlow(context.getString(R.string.default_scenario_name))
@@ -58,6 +59,8 @@ class ScenarioCreationViewModel @Inject constructor(
     private val canBeCreated: Flow<Boolean> = _name.map { name -> !name.isNullOrEmpty() }
     private val _creationState: MutableStateFlow<CreationState> =
         MutableStateFlow(CreationState.CONFIGURING)
+
+
     val creationState: Flow<CreationState> = _creationState.combine(canBeCreated) { state, valid ->
         if (state == CreationState.CONFIGURING && !valid) CreationState.CONFIGURING_INVALID
         else state
@@ -71,10 +74,14 @@ class ScenarioCreationViewModel @Inject constructor(
         _selectedType.value = type
     }
 
+    /**
+     * 保存
+     */
     fun createScenario(context: Context) {
+        Log.d(TAG, "***save***************start")
         if (isInvalidForCreation() || _creationState.value != CreationState.CONFIGURING) return
-
         _creationState.value = CreationState.CREATING
+        Log.d(TAG, "${  _creationState.value}")
         viewModelScope.launch(Dispatchers.IO) {
             when (_selectedType.value) {
                 ScenarioTypeSelection.DUMB -> createDumbScenario()
@@ -82,6 +89,8 @@ class ScenarioCreationViewModel @Inject constructor(
             }
             _creationState.value = CreationState.SAVED
         }
+        Log.d(TAG, "***save***************end")
+
     }
 
     private suspend fun createDumbScenario() {
@@ -122,20 +131,21 @@ data class ScenarioTypeSelectionState(
 
 sealed class ScenarioTypeItem(val titleRes: Int, val iconRes: Int, val descriptionText: Int) {
 
-    data object Dumb: ScenarioTypeItem(
+    data object Dumb : ScenarioTypeItem(
         titleRes = R.string.item_title_dumb_scenario,
         iconRes = R.drawable.ic_dumb,
         descriptionText = R.string.item_desc_dumb_scenario,
     )
 
-    data class Smart(val isProModeEnabled: Boolean): ScenarioTypeItem(
+    data class Smart(val isProModeEnabled: Boolean) : ScenarioTypeItem(
         titleRes = R.string.item_title_smart_scenario,
         iconRes = R.drawable.ic_smart,
         descriptionText =
-            if (isProModeEnabled) R.string.item_desc_smart_scenario_pro_mode
-            else R.string.item_desc_smart_scenario,
+        if (isProModeEnabled) R.string.item_desc_smart_scenario_pro_mode
+        else R.string.item_desc_smart_scenario,
     )
 }
+
 enum class ScenarioTypeSelection {
     DUMB,
     SMART,

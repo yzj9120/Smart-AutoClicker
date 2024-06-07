@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,15 +10,15 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         style="@style/AppTheme.Widget.AppBarLayout"
-        app:liftOnScrollTargetViewId="@id/list"
-        app:liftOnScroll="true">
+        app:liftOnScroll="true"
+        app:liftOnScrollTargetViewId="@id/list">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/topAppBar"
             style="@style/AppTheme.Widget.Toolbar"
             app:layout_scrollFlags="scroll|enterAlways|snap"
-            app:title="@string/activity_title"
-            app:menu="@menu/menu_scenario_fragment" />
+            app:menu="@menu/menu_scenario_fragment"
+            app:title="@string/activity_title" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -34,14 +33,14 @@
             android:id="@+id/empty_lottie_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/empty_text_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
-            app:lottie_rawRes="@raw/lottie_empty"
+            app:lottie_autoPlay="true"
             app:lottie_loop="true"
-            app:lottie_autoPlay="true"/>
+            app:lottie_rawRes="@raw/lottie_empty" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/empty_text_title"
@@ -49,24 +48,49 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/margin_horizontal_default"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/empty_lottie_view"
-            app:layout_constraintBottom_toTopOf="@id/empty_create_button"
+            android:gravity="center_horizontal"
             android:text="@string/message_empty_scenario_list"
-            android:gravity="center_horizontal"/>
+            app:layout_constraintBottom_toTopOf="@id/condition_btngroup"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/empty_lottie_view" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/empty_create_button"
-            style="@style/AppTheme.Widget.TextButton"
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/condition_btngroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/margin_horizontal_large"
-            android:layout_marginBottom="@dimen/margin_vertical_large"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:text="@string/button_text_create_scenario"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/empty_create_button"
+                style="@style/AppTheme.Widget.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/margin_horizontal_large"
+                android:layout_marginBottom="@dimen/margin_vertical_large"
+                android:text="@string/button_text_create_scenario"
+                app:layout_constraintLeft_toLeftOf="parent"
+                tools:ignore="MissingConstraints" />
+
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/empty_def_button"
+                style="@style/AppTheme.Widget.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/margin_horizontal_large"
+                android:layout_marginBottom="@dimen/margin_vertical_large"
+                android:text="@string/button_onekey_create_scenario"
+                app:backgroundTint="#FF0000"
+                app:layout_constraintRight_toRightOf="parent"
+                tools:ignore="MissingConstraints" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -75,32 +99,32 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="vertical"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:listitem="@layout/item_smart_scenario"
-        tools:visibility="gone"/>
+        tools:visibility="gone" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/loading"
         style="@style/AppTheme.Widget.CircularProgressIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:indeterminate="true"
-        android:layout_gravity="center" />
+        android:layout_gravity="center"
+        android:indeterminate="true" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/add"
         style="@style/AppTheme.Widget.Fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_horizontal_default"
+        android:contentDescription="@string/content_desc_add_scenario"
+        android:tint="@color/textTitle"
+        android:visibility="gone"
         app:layout_anchor="@id/list"
         app:layout_anchorGravity="bottom|right|end"
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
-        android:layout_margin="@dimen/margin_horizontal_default"
-        android:tint="@color/textTitle"
         app:srcCompat="@drawable/ic_add"
-        android:contentDescription="@string/content_desc_add_scenario"
-        android:visibility="gone"
-        tools:visibility="gone"/>
+        tools:visibility="gone" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

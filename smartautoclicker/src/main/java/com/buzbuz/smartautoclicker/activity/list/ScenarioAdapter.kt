@@ -1,7 +1,7 @@
-
 package com.buzbuz.smartautoclicker.activity.list
 
 import android.graphics.Bitmap
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,38 +35,45 @@ class ScenarioAdapter(
     private val deleteScenarioListener: ((ScenarioListUiState.Item) -> Unit),
 ) : ListAdapter<ScenarioListUiState.Item, RecyclerView.ViewHolder>(ScenarioDiffUtilCallback) {
 
-    override fun getItemViewType(position: Int): Int =
-        when (getItem(position)) {
+
+    private val TAG = "HUANGZHEN:ScenarioAdapter:"
+
+
+    override fun getItemViewType(position: Int): Int {
+
+        Log.d(TAG, "POSITION= $position");
+        return when (getItem(position)) {
             is ScenarioListUiState.Item.Empty -> R.layout.item_empty_scenario
             is ScenarioListUiState.Item.Valid.Dumb -> R.layout.item_dumb_scenario
             is ScenarioListUiState.Item.Valid.Smart -> R.layout.item_smart_scenario
         }
+    }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
-        when (viewType) {
-            R.layout.item_empty_scenario -> EmptyScenarioHolder(
-                ItemEmptyScenarioBinding.inflate(LayoutInflater.from(parent.context), parent, false),
-                startScenarioListener,
-                deleteScenarioListener,
-            )
 
-            R.layout.item_dumb_scenario -> DumbScenarioViewHolder(
-                ItemDumbScenarioBinding.inflate(LayoutInflater.from(parent.context), parent, false),
-                startScenarioListener,
-                exportClickListener,
-                deleteScenarioListener,
-            )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder = when (viewType) {
+        R.layout.item_empty_scenario -> EmptyScenarioHolder(
+            ItemEmptyScenarioBinding.inflate(LayoutInflater.from(parent.context), parent, false),
+            startScenarioListener,
+            deleteScenarioListener,
+        )
 
-            R.layout.item_smart_scenario -> SmartScenarioViewHolder(
-                ItemSmartScenarioBinding.inflate(LayoutInflater.from(parent.context), parent, false),
-                bitmapProvider,
-                startScenarioListener,
-                exportClickListener,
-                deleteScenarioListener,
-            )
+        R.layout.item_dumb_scenario -> DumbScenarioViewHolder(
+            ItemDumbScenarioBinding.inflate(LayoutInflater.from(parent.context), parent, false),
+            startScenarioListener,
+            exportClickListener,
+            deleteScenarioListener,
+        )
 
-            else -> throw IllegalArgumentException("Unsupported view type !")
-        }
+        R.layout.item_smart_scenario -> SmartScenarioViewHolder(
+            ItemSmartScenarioBinding.inflate(LayoutInflater.from(parent.context), parent, false),
+            bitmapProvider,
+            startScenarioListener,
+            exportClickListener,
+            deleteScenarioListener,
+        )
+
+        else -> throw IllegalArgumentException("Unsupported view type !")
+    }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
@@ -78,19 +85,18 @@ class ScenarioAdapter(
 }
 
 /** DiffUtil Callback comparing two ScenarioItem when updating the [ScenarioAdapter] list. */
-object ScenarioDiffUtilCallback: DiffUtil.ItemCallback<ScenarioListUiState.Item>() {
-    override fun areItemsTheSame(oldItem: ScenarioListUiState.Item, newItem: ScenarioListUiState.Item): Boolean =
-        when {
-            oldItem is ScenarioListUiState.Item.Empty.Dumb && newItem is  ScenarioListUiState.Item.Empty.Dumb->
-                oldItem.scenario.id == newItem.scenario.id
-            oldItem is ScenarioListUiState.Item.Empty.Smart && newItem is  ScenarioListUiState.Item.Empty.Smart->
-                oldItem.scenario.id == newItem.scenario.id
-            oldItem is ScenarioListUiState.Item.Valid.Dumb && newItem is  ScenarioListUiState.Item.Valid.Dumb->
-                oldItem.scenario.id == newItem.scenario.id
-            oldItem is ScenarioListUiState.Item.Valid.Smart && newItem is  ScenarioListUiState.Item.Valid.Smart->
-                oldItem.scenario.id == newItem.scenario.id
-            else -> false
-        }
+object ScenarioDiffUtilCallback : DiffUtil.ItemCallback<ScenarioListUiState.Item>() {
+    override fun areItemsTheSame(oldItem: ScenarioListUiState.Item, newItem: ScenarioListUiState.Item): Boolean = when {
+        oldItem is ScenarioListUiState.Item.Empty.Dumb && newItem is ScenarioListUiState.Item.Empty.Dumb -> oldItem.scenario.id == newItem.scenario.id
+
+        oldItem is ScenarioListUiState.Item.Empty.Smart && newItem is ScenarioListUiState.Item.Empty.Smart -> oldItem.scenario.id == newItem.scenario.id
+
+        oldItem is ScenarioListUiState.Item.Valid.Dumb && newItem is ScenarioListUiState.Item.Valid.Dumb -> oldItem.scenario.id == newItem.scenario.id
+
+        oldItem is ScenarioListUiState.Item.Valid.Smart && newItem is ScenarioListUiState.Item.Valid.Smart -> oldItem.scenario.id == newItem.scenario.id
+
+        else -> false
+    }
 
     override fun areContentsTheSame(oldItem: ScenarioListUiState.Item, newItem: ScenarioListUiState.Item): Boolean =
         oldItem == newItem
@@ -100,7 +106,7 @@ class EmptyScenarioHolder(
     private val viewBinding: ItemEmptyScenarioBinding,
     private val startScenarioListener: ((ScenarioListUiState.Item) -> Unit),
     private val deleteScenarioListener: ((ScenarioListUiState.Item) -> Unit),
-): RecyclerView.ViewHolder(viewBinding.root) {
+) : RecyclerView.ViewHolder(viewBinding.root) {
 
     fun onBind(scenarioItem: ScenarioListUiState.Item.Empty) = viewBinding.apply {
         scenarioName.text = scenarioItem.displayName

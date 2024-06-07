@@ -17,8 +17,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewModelScope
+import com.buzbuz.smartautoclicker.activity.creation.CreationState
 
 import com.buzbuz.smartautoclicker.activity.creation.ScenarioCreationDialog
+import com.buzbuz.smartautoclicker.activity.creation.ScenarioTypeSelection
 import com.buzbuz.smartautoclicker.feature.backup.ui.BackupDialogFragment.Companion.FRAGMENT_TAG_BACKUP_DIALOG
 import com.buzbuz.smartautoclicker.feature.backup.ui.BackupDialogFragment
 
@@ -27,6 +30,7 @@ import com.google.android.material.shape.MaterialShapeDrawable
 import com.gpt40.smartautoclicker.R
 import com.gpt40.smartautoclicker.databinding.FragmentScenariosBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 
 import kotlinx.coroutines.launch
 
@@ -78,6 +82,9 @@ class ScenarioListFragment : Fragment() {
             emptyCreateButton.setOnClickListener { onCreateClicked() }
             add.setOnClickListener { onCreateClicked() }
             topAppBar.setOnMenuItemClickListener { onMenuItemSelected(it) }
+            emptyDefButton.setOnClickListener {
+                scenarioListViewModel.createDumAndSmart()
+            }
         }
 
         /**
@@ -230,12 +237,14 @@ class ScenarioListFragment : Fragment() {
     }
 
     /**
-     * 创建
+     * 创建场景
      * Create and show the [dialog]. Upon Ok press, creates the scenario.
      */
     private fun onCreateClicked() {
         ScenarioCreationDialog().show(requireActivity().supportFragmentManager, ScenarioCreationDialog.FRAGMENT_TAG)
     }
+
+
 
     /**
      * 删除
