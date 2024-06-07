@@ -31,7 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
 
-    private  val TAG = "ScenarioActivity:"
+    private  val TAG = "HUANGZHEN:ScenarioActivity:"
 
     /** 提供点击场景数据给UI的ViewModel。 */
 
@@ -47,8 +47,6 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scenario)
-
-
         scenarioViewModel.stopScenario()
         scenarioViewModel.requestUserConsent(this)
 
@@ -56,10 +54,6 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
 
         projectionActivityResult =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-
-                Log.d(TAG, "projectionActivityResult:============")
-
-
 
                 if (result.resultCode != RESULT_OK) {
                     Toast.makeText(this, R.string.toast_denied_screen_sharing_permission, Toast.LENGTH_SHORT).show()

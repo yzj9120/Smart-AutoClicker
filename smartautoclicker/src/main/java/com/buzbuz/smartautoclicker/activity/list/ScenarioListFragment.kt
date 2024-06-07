@@ -75,11 +75,8 @@ class ScenarioListFragment : Fragment() {
          */
         viewBinding.apply {
             list.adapter = scenariosAdapter
-
             emptyCreateButton.setOnClickListener { onCreateClicked() }
             add.setOnClickListener { onCreateClicked() }
-
-//            appBarLayout.statusBarForeground = MaterialShapeDrawable.createWithElevationOverlay(context)
             topAppBar.setOnMenuItemClickListener { onMenuItemSelected(it) }
         }
 
@@ -89,7 +86,10 @@ class ScenarioListFragment : Fragment() {
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { scenarioListViewModel.uiState.collect(::updateUiState) }
+                launch {
+                    Log.d(TAG, "========监听uistate的变化")
+                    scenarioListViewModel.uiState.collect(::updateUiState)
+                }
             }
         }
     }
@@ -131,7 +131,6 @@ class ScenarioListFragment : Fragment() {
      */
     private fun updateUiState(uiState: ScenarioListUiState?) {
         uiState ?: return
-
         updateMenu(uiState.menuUiState)
         updateScenarioList(uiState)
     }
@@ -193,7 +192,7 @@ class ScenarioListFragment : Fragment() {
         }
 
 
-        Log.d("model_list", ": ${uiState.listContent}");
+        Log.d(TAG, "model_list: ${uiState.listContent}");
         scenariosAdapter.submitList(uiState.listContent)
     }
 
@@ -282,4 +281,4 @@ private fun MenuItem.bind(state: ScenarioListUiState.Menu.Item) {
 }
 
 /** Tag for logs. */
-private const val TAG = "ScenarioListFragment"
+private const val TAG = "HUANGZHEN:ScenarioListFragment："

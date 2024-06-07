@@ -23,6 +23,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 
 import androidx.core.content.PermissionChecker
@@ -57,6 +58,10 @@ class ScenarioViewModel @Inject constructor(
     private val permissionController: PermissionsController,
 ) : ViewModel() {
 
+    private  val TAG = "HUANGZHEN:ScenarioViewModel:"
+
+
+
     /** Callback upon the availability of the [SmartAutoClickerService]. */
     private val serviceConnection: (SmartAutoClickerService.ILocalService?) -> Unit = { localService ->
         clickerService = localService
@@ -88,10 +93,12 @@ class ScenarioViewModel @Inject constructor(
     }
 
     fun requestUserConsent(activity: Activity) {
+        Log.d(TAG, "requestUserConsent")
         revenueRepository.startUserConsentRequestUiFlowIfNeeded(activity)
     }
 
     fun refreshPurchaseState() {
+        Log.d(TAG, "refreshPurchaseState")
         revenueRepository.refreshPurchases()
     }
 
@@ -99,6 +106,8 @@ class ScenarioViewModel @Inject constructor(
      * 获取悬浮权限
      */
     fun startPermissionFlowIfNeeded(activity: AppCompatActivity, onAllGranted: () -> Unit) {
+        Log.d(TAG, "startPermissionFlowIfNeeded")
+
         permissionController.startPermissionsUiFlow(
             activity = activity,
             permissions = listOf(
@@ -114,6 +123,8 @@ class ScenarioViewModel @Inject constructor(
     }
 
     fun startTroubleshootingFlowIfNeeded(activity: FragmentActivity, onCompleted: () -> Unit) {
+        Log.d(TAG, "startTroubleshootingFlowIfNeeded")
+
         qualityRepository.startTroubleshootingUiFlowIfNeeded(activity, onCompleted)
     }
 
@@ -155,7 +166,10 @@ class ScenarioViewModel @Inject constructor(
     /**停止覆盖UI并释放所有关联的资源*/
 
     fun stopScenario() {
+
         clickerService?.stop()
     }
+
+
 }
 

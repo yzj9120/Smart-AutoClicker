@@ -3,6 +3,7 @@ package com.buzbuz.smartautoclicker.activity.list
 import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
@@ -49,12 +50,30 @@ class ScenarioListViewModel @Inject constructor(
     private val qualityRepository: QualityRepository,
 ) : ViewModel() {
 
-    /** Current state type of the ui. */
+    private val TAG = "HUANGZHEN:ScenarioListViewModel:"
+
+    /**
+     * 这是一个 MutableStateFlow，它是 Kotlin 协程中的一种 StateFlow。
+     * StateFlow 是一个状态持有的可观察流，会向其收集器发出当前和新的状态更新。
+     * uiStateType 保存当前的 UI 状态，并初始化为 ScenarioListUiState.Type.SELECTION。
+     */
     private val uiStateType = MutableStateFlow(ScenarioListUiState.Type.SELECTION)
 
-    /** The currently searched action name. Null if no is. */
+    /**
+     * 这是另一个 MutableStateFlow，但它持有一个可为空的 String。
+     * 它表示用户当前输入的搜索查询。如果没有搜索查询，它就是 null。
+     */
     private val searchQuery = MutableStateFlow<String?>(null)
-    /** Dumb & Smart scenario together. */
+
+    /**
+     *
+     * 这是一个 Flow，会发出一个包含 ScenarioListUiState.Item 对象的列表。
+     * 它组合了两个不同的场景列表：来自 dumbRepository 的 dumbScenarios 和来自 smartRepository 的 scenarios。
+     * 使用 Kotlin 协程中的 combine 函数来合并这两个列表。
+     * 列表中的每个项目都会映射到一个 ScenarioListUiState.Item，然后合并成一个可变列表，并按照每个项目的 displayName 排序。
+     *
+     */
+
     private val allScenarios: Flow<List<ScenarioListUiState.Item>> =
         combine(dumbRepository.dumbScenarios, smartRepository.scenarios) { dumbList, smartList ->
             mutableListOf<ScenarioListUiState.Item>().apply {
@@ -62,17 +81,71 @@ class ScenarioListViewModel @Inject constructor(
                 addAll(smartList.map { it.toItem() })
             }.sortedBy { it.displayName }
         }
-    /** Flow upon the list of Dumb & Smart scenarios, filtered with the search query. */
-    private val filteredScenarios: Flow<List<ScenarioListUiState.Item>> = allScenarios
-        .combine(searchQuery) { scenarios, query ->
-            scenarios.mapNotNull { scenario ->
-                if (query.isNullOrEmpty()) return@mapNotNull scenario
-                if (scenario.displayName.contains(query.toString(), true)) scenario else null
-            }
-        }
 
-    /** Set of scenario identifier selected for a backup. */
+    /**
+     *
+     * 这是另一个 Flow，会发出一个包含 ScenarioListUiState.Item 对象的列表。
+     * 它将 allScenarios 流与 searchQuery 流结合起来。
+     * combine 函数中的 lambda 函数根据 query 过滤 scenarios。
+     * 如果 query 为 null 或为空，它会返回原始场景。如果有查询，它会过滤场景，只包括那些 displayName 包含查询字符串的场景（忽略大小写差异）。
+     *
+     */
+    private val filteredScenarios: Flow<List<ScenarioListUiState.Item>> =
+        allScenarios.combine(searchQuery) { scenarios, query ->
+                scenarios.mapNotNull { scenario ->
+                    if (query.isNullOrEmpty()) return@mapNotNull scenario
+                    if (scenario.displayName.contains(query.toString(), true)) scenario else null
+                }
+            }
+
+    /**
+     * 这是一个 MutableStateFlow，持有一个 ScenarioBackupSelection 对象。
+     * 它表示选择用于备份的场景标识符集合。
+     */
     private val selectedForBackup = MutableStateFlow(ScenarioBackupSelection())
+
+    /**
+     * 这是一个 StateFlow<ScenarioListUiState?> 类型的属性。
+     * 它结合了多个流：uiStateType、filteredScenarios、selectedForBackup、revenueRepository.userBillingState 和 revenueRepository.isPrivacySettingRequired。
+     * 使用 combine 函数来合并这些流，并生成一个新的 ScenarioListUiState 对象。
+     * 合并函数的 lambda 表达式根据当前的状态类型、场景列表、备份选择、账单状态和隐私设置的要求来创建 ScenarioListUiState 对象。
+     * ScenarioListUiState 的 type 属性被设置为 stateType。
+     * menuUiState 通过调用 stateType.toMenuUiState 并传递 scenarios、backupSelection、billingState 和 privacyRequired 来生成。
+     * listContent 属性：
+     * 如果 stateType 不是 ScenarioListUiState.Type.EXPORT，则直接使用 scenarios。
+     * 否则，使用 scenarios.filterForBackupSelection(backupSelection) 来过滤场景。
+     * 使用 stateIn 函数将流转换为 StateFlow，并在 viewModelScope 范围内共享，启动策略为 SharingStarted.WhileSubscribed(5_000)，初始值为 null。
+     */
+    // 定义一个函数来创建 ScenarioListUiState 对象
+    private fun createScenarioListUiState(
+        stateType: ScenarioListUiState.Type,
+        scenarios: List<ScenarioListUiState.Item>,
+        backupSelection: ScenarioBackupSelection,
+        billingState: UserBillingState,
+        privacyRequired: Boolean
+    ): ScenarioListUiState {
+        Log.d(
+            TAG,
+            "createScenarioListUiState =$stateType.. $scenarios......$backupSelection....$billingState......$privacyRequired"
+        )
+        return ScenarioListUiState(
+            type = stateType,
+            menuUiState = stateType.toMenuUiState(scenarios, backupSelection, billingState, privacyRequired),
+            listContent = if (stateType != ScenarioListUiState.Type.EXPORT) scenarios
+            else scenarios.filterForBackupSelection(backupSelection)
+        )
+    }
+
+    // 创建一个组合函数
+    private fun combineScenarios(
+        stateType: ScenarioListUiState.Type,
+        scenarios: List<ScenarioListUiState.Item>,
+        backupSelection: ScenarioBackupSelection,
+        billingState: UserBillingState,
+        privacyRequired: Boolean
+    ): ScenarioListUiState {
+        return createScenarioListUiState(stateType, scenarios, backupSelection, billingState, privacyRequired)
+    }
 
     val uiState: StateFlow<ScenarioListUiState?> = combine(
         uiStateType,
@@ -80,19 +153,11 @@ class ScenarioListViewModel @Inject constructor(
         selectedForBackup,
         revenueRepository.userBillingState,
         revenueRepository.isPrivacySettingRequired,
-    ) { stateType, scenarios, backupSelection, billingState, privacyRequired ->
-        ScenarioListUiState(
-            type = stateType,
-            menuUiState = stateType.toMenuUiState(scenarios, backupSelection, billingState, privacyRequired),
-            listContent =
-                if (stateType != ScenarioListUiState.Type.EXPORT) scenarios
-                else scenarios.filterForBackupSelection(backupSelection),
-        )
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
-        null,
+        ::combineScenarios
+    ).stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5000L), null
     )
+
 
     /**
      * Change the ui state type.
@@ -115,12 +180,10 @@ class ScenarioListViewModel @Inject constructor(
     }
 
     /** @return the list of selected dumb scenario identifiers. */
-    fun getDumbScenariosSelectedForBackup(): Collection<Long> =
-        selectedForBackup.value.dumbSelection.toList()
+    fun getDumbScenariosSelectedForBackup(): Collection<Long> = selectedForBackup.value.dumbSelection.toList()
 
     /** @return the list of selected smart scenario identifiers. */
-    fun getSmartScenariosSelectedForBackup(): Collection<Long> =
-        selectedForBackup.value.smartSelection.toList()
+    fun getSmartScenariosSelectedForBackup(): Collection<Long> = selectedForBackup.value.smartSelection.toList()
 
     /**
      * Toggle the selected for backup state of a scenario.
@@ -187,6 +250,7 @@ class ScenarioListViewModel @Inject constructor(
         ScenarioListUiState.Type.EXPORT -> ScenarioListUiState.Menu.Export(
             canExport = !backupSelection.isEmpty(),
         )
+
         ScenarioListUiState.Type.SELECTION -> ScenarioListUiState.Menu.Selection(
             searchEnabled = scenarioItems.isNotEmpty(),
             exportEnabled = scenarioItems.firstOrNull { it is ScenarioListUiState.Item.Valid } != null,
@@ -236,16 +300,18 @@ class ScenarioListViewModel @Inject constructor(
 
     private fun List<ScenarioListUiState.Item>.filterForBackupSelection(
         backupSelection: ScenarioBackupSelection,
-    ) : List<ScenarioListUiState.Item> = mapNotNull { item ->
+    ): List<ScenarioListUiState.Item> = mapNotNull { item ->
         when (item) {
             is ScenarioListUiState.Item.Valid.Dumb -> item.copy(
                 showExportCheckbox = true,
                 checkedForExport = backupSelection.dumbSelection.contains(item.scenario.id.databaseId)
             )
+
             is ScenarioListUiState.Item.Valid.Smart -> item.copy(
                 showExportCheckbox = true,
                 checkedForExport = backupSelection.smartSelection.contains(item.scenario.id.databaseId)
             )
+
             else -> null
         }
     }

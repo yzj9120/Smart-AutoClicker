@@ -19,6 +19,7 @@ package com.buzbuz.smartautoclicker
 import android.content.Context
 import android.content.Intent
 import android.media.projection.MediaProjectionManager
+import android.util.Log
 import android.view.KeyEvent
 
 import com.buzbuz.smartautoclicker.core.base.AndroidExecutor
@@ -52,6 +53,10 @@ class LocalService(
     private val onStop: () -> Unit,
 ) : SmartAutoClickerService.ILocalService {
 
+
+    private  val TAG = "HUANGZHEN:LocalService:"
+
+
     /** Scope for this LocalService. */
     private val serviceScope: CoroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     /** Coroutine job for the delayed start of engine & ui. */
@@ -60,6 +65,8 @@ class LocalService(
     internal var isStarted: Boolean = false
 
     override fun startDumbScenario(dumbScenario: DumbScenario) {
+
+        Log.d(TAG, "startDumbScenario：${dumbScenario.toString()}")
         if (isStarted) return
         isStarted = true
         onStart(false, dumbScenario.name)
@@ -92,6 +99,10 @@ class LocalService(
      * @param scenario the identifier of the scenario of clicks to be used for detection.
      */
     override fun startSmartScenario(resultCode: Int, data: Intent, scenario: Scenario) {
+
+        Log.d(TAG, "startSmartScenario：${scenario.toString()}")
+
+
         if (isStarted) return
         isStarted = true
         onStart(true, scenario.name)
@@ -120,6 +131,9 @@ class LocalService(
     }
 
     override fun stop() {
+
+        Log.d(TAG, "stop：")
+
         if (!isStarted) return
         isStarted = false
 
@@ -142,11 +156,18 @@ class LocalService(
     }
 
     fun onKeyEvent(event: KeyEvent?): Boolean {
+
+        Log.d(TAG, "onKeyEvent：")
+
         event ?: return false
         return overlayManager.propagateKeyEvent(event)
     }
 
     fun toggleOverlaysVisibility() {
+
+        Log.d(TAG, "toggleOverlaysVisibility：")
+
+
         overlayManager.apply {
             if (isStackHidden()) {
                 restoreVisibility()

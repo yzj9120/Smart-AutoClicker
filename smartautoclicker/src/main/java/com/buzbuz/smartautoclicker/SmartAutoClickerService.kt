@@ -317,6 +317,9 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
             .append("scenarioName=").append("$currentScenarioName; ")
             .println()
 
+
+
+        Log.d(TAG, "dump: $writer")
         displayMetrics.dump(writer)
         bitmapManager.dump(writer)
         overlayManager.dump(writer)
@@ -332,4 +335,4 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
 }
 
 /** Tag for the logs. */
-private const val TAG = "SmartAutoClickerService"
+private const val TAG = "HUANGZHEN：SmartAutoClickerService"
