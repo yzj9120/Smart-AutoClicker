@@ -82,9 +82,7 @@ class ScenarioListFragment : Fragment() {
             emptyCreateButton.setOnClickListener { onCreateClicked() }
             add.setOnClickListener { onCreateClicked() }
             topAppBar.setOnMenuItemClickListener { onMenuItemSelected(it) }
-            emptyDefButton.setOnClickListener {
-                scenarioListViewModel.createDumAndSmart()
-            }
+            scenarioListViewModel.createDumAndSmart()
         }
 
         /**

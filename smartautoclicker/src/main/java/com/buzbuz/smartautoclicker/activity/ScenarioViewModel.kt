@@ -22,6 +22,7 @@ import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Point
 import android.os.Build
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -34,10 +35,12 @@ import androidx.lifecycle.viewModelScope
 import com.buzbuz.smartautoclicker.SmartAutoClickerService
 import com.buzbuz.smartautoclicker.core.base.identifier.DATABASE_ID_INSERTION
 import com.buzbuz.smartautoclicker.core.base.identifier.Identifier
+import com.buzbuz.smartautoclicker.core.base.identifier.IdentifierCreator
 import com.buzbuz.smartautoclicker.core.common.quality.domain.QualityRepository
 import com.buzbuz.smartautoclicker.core.domain.IRepository
 import com.buzbuz.smartautoclicker.core.domain.model.scenario.Scenario
 import com.buzbuz.smartautoclicker.core.dumb.domain.IDumbRepository
+import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbAction
 import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbScenario
 import com.buzbuz.smartautoclicker.feature.permissions.PermissionsController
 import com.buzbuz.smartautoclicker.feature.permissions.model.PermissionAccessibilityService
@@ -49,15 +52,19 @@ import com.gpt40.smartautoclicker.R
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /** AndroidViewModel for create/delete/list click scenarios from an LifecycleOwner. */
 @HiltViewModel
 class ScenarioViewModel @Inject constructor(
     @ApplicationContext context: Context,
+    private val smartRepository: IRepository,
+    private val dumbRepository: IDumbRepository,
     private val revenueRepository: IRevenueRepository,
     private val qualityRepository: QualityRepository,
     private val permissionController: PermissionsController,
@@ -174,6 +181,68 @@ class ScenarioViewModel @Inject constructor(
     fun stopScenario() {
 
         clickerService?.stop()
+    }
+
+    /**
+     *
+     * 一键添加数据 ：
+     * TODO
+     */
+    fun createDumAndSmart() {
+        viewModelScope.launch(Dispatchers.IO) {
+            createDumbScenario();
+            createSmartScenario();
+        }
+
+    }
+
+    /**
+     *
+     * [DumbClick(id=Identifier(databaseId=4, tempId=null), scenarioId=Identifier(databaseId=11, tempId=null), name=Click, priority=0, repeatCount=18, isRepeatInfinite=false, repeatDelayMs=5, position=Point(460, 1494), pressDurationMs=10)]
+     *
+     */
+    private suspend fun createDumbScenario() {
+        val dumbActionsIdCreator = IdentifierCreator()
+        val dumbActions: MutableList<DumbAction> = mutableListOf()
+        val dumbScenarioId = Identifier(databaseId = DATABASE_ID_INSERTION, tempId = 0L)
+        //在 1ms 期间重复 点击2次
+        val bean = DumbAction.DumbClick(
+            id = dumbActionsIdCreator.generateNewIdentifier(),
+            scenarioId = dumbScenarioId,
+            name = "Click",
+            priority = 0,//优先级
+            position = Point(486, 1518),// 坐标位置
+            pressDurationMs = 1,//单击持续时间（ms）
+            repeatCount = 2,//重复计数
+            isRepeatInfinite = true,
+            repeatDelayMs = 6,//重复延迟（ms)
+        )
+        // 直接添加元素
+        dumbActions.add(bean)
+        //DumbClick(id=Identifier(databaseId=0, tempId=1), scenarioId=Identifier(databaseId=1, tempId=null), name=Click, priority=0, repeatCount=1, isRepeatInfinite=false, repeatDelayMs=0, position=Point(310, 1487), pressDurationMs=1)
+        dumbRepository.addDumbScenario(
+            DumbScenario(
+                id = dumbScenarioId,
+                name = "坐标$DATABASE_ID_INSERTION",
+                dumbActions = dumbActions,    // 活动
+                repeatCount = 1, // 重复次数
+                isRepeatInfinite = false, //是否无限重复
+                maxDurationMin = 1,  // 最长延长时间 分钟
+                isDurationInfinite = true,
+                randomize = false, // 是否反作弊
+            )
+        )
+    }
+
+    private suspend fun createSmartScenario() {
+        smartRepository.addScenario(
+            Scenario(
+                id = Identifier(databaseId = DATABASE_ID_INSERTION, tempId = 0L),
+                name = "图形$DATABASE_ID_INSERTION",
+                detectionQuality = 1200,
+                randomize = false,
+            )
+        )
     }
 
 
