@@ -3,6 +3,7 @@ package com.buzbuz.smartautoclicker.activity.list
 import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Point
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
@@ -10,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.buzbuz.smartautoclicker.core.base.identifier.DATABASE_ID_INSERTION
 import com.buzbuz.smartautoclicker.core.base.identifier.Identifier
+import com.buzbuz.smartautoclicker.core.base.identifier.IdentifierCreator
 
 import com.buzbuz.smartautoclicker.core.common.quality.domain.QualityRepository
 import com.buzbuz.smartautoclicker.core.domain.IRepository
@@ -20,6 +22,7 @@ import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbAction
 import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbScenario
 import com.buzbuz.smartautoclicker.core.dumb.domain.model.Repeatable
 import com.buzbuz.smartautoclicker.core.ui.utils.formatDuration
+import com.buzbuz.smartautoclicker.feature.dumb.config.domain.EditedDumbActionsBuilder
 import com.buzbuz.smartautoclicker.feature.revenue.IRevenueRepository
 import com.buzbuz.smartautoclicker.feature.revenue.UserBillingState
 import com.buzbuz.smartautoclicker.feature.smart.config.utils.getImageConditionBitmap
@@ -394,11 +397,29 @@ class ScenarioListViewModel @Inject constructor(
      *
      */
     private suspend fun createDumbScenario() {
+         val dumbActionsIdCreator = IdentifierCreator()
+        val dumbActions: MutableList<DumbAction> = mutableListOf()
+        val dumbScenarioId = Identifier(databaseId = DATABASE_ID_INSERTION, tempId = 0L)
+        //在 1ms 期间重复 点击2次
+        val bean = DumbAction.DumbClick(
+            id = dumbActionsIdCreator.generateNewIdentifier(),
+            scenarioId = dumbScenarioId,
+            name = "Click",
+            priority = 0,//优先级
+            position = Point(486, 1518),// 坐标位置
+            pressDurationMs = 1,//单击持续时间（ms）
+            repeatCount = 2,//重复计数
+            isRepeatInfinite = true,
+            repeatDelayMs = 6,//重复延迟（ms)
+        )
+        // 直接添加元素
+        dumbActions.add(bean)
+        //DumbClick(id=Identifier(databaseId=0, tempId=1), scenarioId=Identifier(databaseId=1, tempId=null), name=Click, priority=0, repeatCount=1, isRepeatInfinite=false, repeatDelayMs=0, position=Point(310, 1487), pressDurationMs=1)
         dumbRepository.addDumbScenario(
             DumbScenario(
-                id = Identifier(databaseId = DATABASE_ID_INSERTION, tempId = 0L),
+                id = dumbScenarioId,
                 name = "坐标$DATABASE_ID_INSERTION",
-                dumbActions = emptyList(),    // 活动
+                dumbActions = dumbActions,    // 活动
                 repeatCount = 1, // 重复次数
                 isRepeatInfinite = false, //是否无限重复
                 maxDurationMin = 1,  // 最长延长时间 分钟

@@ -127,4 +127,4 @@ class DumbScenarioDataSource @Inject constructor(
     }
 }
 
-private const val TAG = "DumbScenarioDataSource"
+private const val TAG = "hz:DumbScenarioDataSource"

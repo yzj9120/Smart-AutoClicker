@@ -179,4 +179,4 @@ class DumbEditionRepository @Inject constructor(
 }
 
 /** Tag for logs */
-private const val TAG = "DumbEditionRepository"
+private const val TAG = "hz:DumbEditionRepository"

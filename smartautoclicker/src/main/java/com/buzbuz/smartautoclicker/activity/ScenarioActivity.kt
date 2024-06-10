@@ -88,7 +88,6 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
     ///处理所有必要权限被授予的情况。它在需要时启动故障排除流程，然后启动适当的场景。
     private fun onMandatoryPermissionsGranted() {
         Log.d(TAG, "onMandatoryPermissionsGranted:****")
-
         scenarioViewModel.startTroubleshootingFlowIfNeeded(this) {
             when (val scenario = requestedItem?.scenario) {
                 is DumbScenario -> startDumbScenario(scenario)
@@ -123,7 +122,6 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
 
     private fun startDumbScenario(scenario: DumbScenario) {
         Log.d(TAG, "startDumbScenario:")
-
         handleScenarioStartResult(
             scenarioViewModel.loadDumbScenario(
                 context = this,

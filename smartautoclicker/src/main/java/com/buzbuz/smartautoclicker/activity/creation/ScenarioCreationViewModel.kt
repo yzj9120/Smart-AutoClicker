@@ -11,6 +11,7 @@ import com.buzbuz.smartautoclicker.core.base.identifier.Identifier
 import com.buzbuz.smartautoclicker.core.domain.IRepository
 import com.buzbuz.smartautoclicker.core.domain.model.scenario.Scenario
 import com.buzbuz.smartautoclicker.core.dumb.domain.IDumbRepository
+import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbAction
 import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbScenario
 import com.buzbuz.smartautoclicker.feature.revenue.IRevenueRepository
 import com.buzbuz.smartautoclicker.feature.revenue.UserBillingState
@@ -81,7 +82,7 @@ class ScenarioCreationViewModel @Inject constructor(
         Log.d(TAG, "***save***************start")
         if (isInvalidForCreation() || _creationState.value != CreationState.CONFIGURING) return
         _creationState.value = CreationState.CREATING
-        Log.d(TAG, "${  _creationState.value}")
+        Log.d(TAG, "${_creationState.value}")
         viewModelScope.launch(Dispatchers.IO) {
             when (_selectedType.value) {
                 ScenarioTypeSelection.DUMB -> createDumbScenario()
@@ -94,6 +95,10 @@ class ScenarioCreationViewModel @Inject constructor(
     }
 
     private suspend fun createDumbScenario() {
+
+
+
+
         dumbRepository.addDumbScenario(
             DumbScenario(
                 id = Identifier(databaseId = DATABASE_ID_INSERTION, tempId = 0L),
