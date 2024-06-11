@@ -19,6 +19,7 @@ package com.buzbuz.smartautoclicker.feature.dumb.config.ui
 import android.content.DialogInterface
 import android.view.KeyEvent
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.view.ContextThemeWrapper
 
@@ -54,6 +55,7 @@ class DumbMainMenu(
 
     /** View binding for the content of the overlay. */
     private lateinit var viewBinding: OverlayDumbMainMenuBinding
+
     /** Controls the animations of the play/pause button. */
     private lateinit var playPauseButtonController: AnimatedStatesImageButtonController
 
@@ -87,6 +89,9 @@ class DumbMainMenu(
             playPauseButtonController.attachView(btnPlay)
         }
 
+        viewBinding.btnActionList.visibility = View.GONE;
+        viewBinding.btnShowActions.visibility = View.GONE;
+        viewBinding.btnMove.visibility = View.GONE;
         return viewBinding.root
     }
 
@@ -123,33 +128,44 @@ class DumbMainMenu(
         setMenuItemViewEnabled(viewBinding.btnPlay, canStartDetection)
 
     private fun updateMenuPlayingState(isPlaying: Boolean) {
+
+
+
         val currentState = viewBinding.btnPlay.tag
         if (currentState == isPlaying) return
 
         viewBinding.btnPlay.tag = isPlaying
-        if (isPlaying) {
-            if (currentState == null) {
-                playPauseButtonController.toState2(false)
-            } else {
-                animateLayoutChanges {
-                    setMenuItemVisibility(viewBinding.btnStop, false)
-                    setMenuItemVisibility(viewBinding.btnShowActions, false)
-                    setMenuItemVisibility(viewBinding.btnActionList, false)
-                    playPauseButtonController.toState2(true)
-                }
-            }
-        } else {
-            if (currentState == null) {
-                playPauseButtonController.toState1(false)
-            } else {
-                animateLayoutChanges {
-                    setMenuItemVisibility(viewBinding.btnStop, true)
-                    setMenuItemVisibility(viewBinding.btnShowActions, true)
-                    setMenuItemVisibility(viewBinding.btnActionList, true)
-                    playPauseButtonController.toState1(true)
-                }
-            }
-        }
+
+//
+//        if (isPlaying) {
+//            if (currentState == null) {
+//                playPauseButtonController.toState2(false)
+//            } else {
+//                animateLayoutChanges {
+//                    setMenuItemVisibility(viewBinding.btnStop, false)
+//                    setMenuItemVisibility(viewBinding.btnShowActions, false)
+//                    setMenuItemVisibility(viewBinding.btnActionList, false)
+//                    playPauseButtonController.toState2(true)
+//                }
+//            }
+//        } else {
+//            if (currentState == null) {
+//                playPauseButtonController.toState1(false)
+//            } else {
+//                animateLayoutChanges {
+//                    setMenuItemVisibility(viewBinding.btnStop, true)
+//                    setMenuItemVisibility(viewBinding.btnShowActions, true)
+//                    setMenuItemVisibility(viewBinding.btnActionList, true)
+//                    playPauseButtonController.toState1(true)
+//                }
+//            }
+//        }
+
+
+
+        viewBinding.btnActionList.visibility = View.GONE;
+        viewBinding.btnShowActions.visibility = View.GONE;
+        viewBinding.btnMove.visibility = View.GONE;
     }
 
     override fun onMenuItemClicked(viewId: Int) {

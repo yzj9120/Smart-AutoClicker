@@ -16,6 +16,7 @@
  */
 package com.buzbuz.smartautoclicker.feature.dumb.config.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
@@ -34,7 +35,7 @@ class DumbMainMenuModel @Inject constructor(
     private val dumbEditionRepository: DumbEditionRepository,
     private val dumbEngine: DumbEngine,
 ) : ViewModel() {
-
+    private val TAG = "hz:DumbMainMenuModel"
     val canPlay: Flow<Boolean> =
         combine(dumbEditionRepository.isEditionSynchronized, dumbEngine.dumbScenario) { isSync, scenario ->
             isSync && scenario?.isValid() ?: false
@@ -43,6 +44,10 @@ class DumbMainMenuModel @Inject constructor(
         dumbEngine.isRunning
 
     fun startEdition(dumbScenarioId: Identifier, onStarted: () -> Unit) {
+
+        Log.d(TAG, "startEdition.....")
+
+
         viewModelScope.launch(Dispatchers.IO) {
             if (dumbEditionRepository.startEdition(dumbScenarioId.databaseId)) {
                 withContext(Dispatchers.Main) {
@@ -53,6 +58,8 @@ class DumbMainMenuModel @Inject constructor(
     }
 
     fun saveEditions() {
+        Log.d(TAG, "saveEditions.....")
+
         viewModelScope.launch(Dispatchers.IO) {
             dumbEditionRepository.apply {
                 saveEditions()
@@ -61,10 +68,15 @@ class DumbMainMenuModel @Inject constructor(
     }
 
     fun stopEdition() {
+        Log.d(TAG, "stopEdition.....")
+
         dumbEditionRepository.stopEdition()
     }
 
     fun toggleScenarioPlay() {
+
+        Log.d(TAG, "toggleScenarioPlay.....")
+
         viewModelScope.launch {
             if (isPlaying.value) dumbEngine.stopDumbScenario()
             else dumbEngine.startDumbScenario()
@@ -72,6 +84,9 @@ class DumbMainMenuModel @Inject constructor(
     }
 
     fun stopScenarioPlay(): Boolean {
+
+        Log.d(TAG, "stopScenarioPlay.....")
+
         if (!isPlaying.value) return false
 
         viewModelScope.launch {

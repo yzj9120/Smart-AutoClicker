@@ -70,12 +70,14 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
     companion object {
         /**此服务的前台通知的标识符*/
         private const val NOTIFICATION_ID = 42
+
         /**此服务的前台通知的通道标识符*/
         private const val NOTIFICATION_CHANNEL_ID = "SmartAutoClickerService"
 
         /**通知中的操作*/
         private const val INTENT_ACTION_TOGGLE_OVERLAY = "com.buzbuz.smartautoclicker.ACTION_TOGGLE_OVERLAY_VISIBILITY"
         private const val INTENT_ACTION_STOP_SCENARIO = "com.buzbuz.smartautoclicker.ACTION_STOP_SCENARIO"
+
         /**[ILocalService]的实例，为该服务提供对“活动”的访问权限*/
 
         private var LOCAL_SERVICE_INSTANCE: ILocalService? = null
@@ -110,34 +112,47 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
         fun startSmartScenario(resultCode: Int, data: Intent, scenario: Scenario)
         fun stop()
         fun release()
+        fun openOverlayManager(dumbScenario: DumbScenario);
     }
 
     private val localService: LocalService?
         get() = LOCAL_SERVICE_INSTANCE as? LocalService
 
     ///覆盖层
-    @Inject lateinit var overlayManager: OverlayManager
+    @Inject
+    lateinit var overlayManager: OverlayManager
+
     ///屏幕相关
-    @Inject lateinit var displayMetrics: DisplayMetrics
+    @Inject
+    lateinit var displayMetrics: DisplayMetrics
+
     ///
-    @Inject lateinit var detectionRepository: DetectionRepository
-    @Inject lateinit var dumbEngine: DumbEngine
+    @Inject
+    lateinit var detectionRepository: DetectionRepository
+    @Inject
+    lateinit var dumbEngine: DumbEngine
+
     ////**管理单击条件的位图*/
-    @Inject lateinit var bitmapManager: IBitmapManager
-    @Inject lateinit var qualityRepository: QualityRepository
-    @Inject lateinit var qualityMetricsMonitor: QualityMetricsMonitor
-    @Inject lateinit var revenueRepository: IRevenueRepository
+    @Inject
+    lateinit var bitmapManager: IBitmapManager
+    @Inject
+    lateinit var qualityRepository: QualityRepository
+    @Inject
+    lateinit var qualityMetricsMonitor: QualityMetricsMonitor
+    @Inject
+    lateinit var revenueRepository: IRevenueRepository
 
     private var currentScenarioName: String? = null
 
     /** Receives commands from the notification. */
-    private var notificationActionsReceiver : BroadcastReceiver? = null
+    private var notificationActionsReceiver: BroadcastReceiver? = null
 
     /**
      * 方法在服务连接时调用，初始化和配置服务
      */
     override fun onServiceConnected() {
         super.onServiceConnected()
+        Log.d(TAG, "onServiceConnected...")
 
         qualityMetricsMonitor.onServiceConnected()
         LOCAL_SERVICE_INSTANCE = LocalService(
@@ -149,8 +164,7 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
             bitmapManager = bitmapManager,
             androidExecutor = this,
             onStart = { isSmart, name ->
-
-                      Log.d(TAG,"isSmart=$isSmart.....name=$isSmart")
+                Log.d(TAG, "isSmart=$isSmart.....name=$isSmart")
                 qualityMetricsMonitor.onServiceForegroundStart()
                 currentScenarioName = name
                 if (isSmart) {
@@ -160,7 +174,6 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
                 requestFilterKeyEvents(true)
             },
             onStop = {
-//                   private val TAG = "Hz:LocalService:"
             },
         )
 
@@ -248,7 +261,7 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
         return builder.build()
     }
 
-    private fun createNotificationActionReceiver() : BroadcastReceiver =
+    private fun createNotificationActionReceiver(): BroadcastReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 intent ?: return
@@ -316,9 +329,6 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
             .append("- isStarted=").append("${(LOCAL_SERVICE_INSTANCE as? LocalService)?.isStarted ?: false}; ")
             .append("scenarioName=").append("$currentScenarioName; ")
             .println()
-
-
-
         Log.d(TAG, "dump: $writer")
         displayMetrics.dump(writer)
         bitmapManager.dump(writer)
@@ -326,12 +336,17 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
         detectionRepository.dump(writer)
         dumbEngine.dump(writer)
         qualityRepository.dump(writer)
-
         revenueRepository.dump(writer)
     }
 
-    override fun onInterrupt() { /* Unused */ }
-    override fun onAccessibilityEvent(event: AccessibilityEvent?) { /* Unused */ }
+    override fun onInterrupt() { /* Unused */
+    }
+
+    override fun onAccessibilityEvent(event: AccessibilityEvent?) { /* Unused */
+
+
+        Log.d(TAG, "onAccessibilityEvent：${event}")
+    }
 }
 
 /** Tag for the logs. */

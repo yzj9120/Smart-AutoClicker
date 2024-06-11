@@ -19,6 +19,7 @@ import com.buzbuz.smartautoclicker.core.dumb.domain.IDumbRepository
 import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbAction
 import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbScenario
 import com.buzbuz.smartautoclicker.core.dumb.domain.model.Repeatable
+import com.buzbuz.smartautoclicker.core.dumb.engine.DumbEngine
 import com.buzbuz.smartautoclicker.core.ui.utils.formatDuration
 import com.buzbuz.smartautoclicker.feature.revenue.IRevenueRepository
 import com.buzbuz.smartautoclicker.feature.revenue.UserBillingState
@@ -108,7 +109,6 @@ class ScenarioListViewModel @Inject constructor(
     private val selectedForBackup = MutableStateFlow(ScenarioBackupSelection())
 
 
-    val sharedPreferencesUtil = SharedPreferencesUtil(context)
 
 
     /**
@@ -378,38 +378,6 @@ class ScenarioListViewModel @Inject constructor(
         }
     }
 
-    /**
-     *
-     * 一键添加数据 ：
-     * TODO
-     */
-    fun createDumAndSmart() {
 
-        val isCreateScenario = sharedPreferencesUtil.getBoolean("is_create_scenario")
-        if (!isCreateScenario) {
-            viewModelScope.launch(Dispatchers.IO) {
-                val voiceActionUtil = VoiceActionUtil(dumbRepository,  DATABASE_ID_INSERTION)
-                voiceActionUtil.executeVoiceActions()
-
-                createSmartScenario();
-                sharedPreferencesUtil.putBoolean("is_create_scenario", true)
-            }
-        }
-
-    }
-
-
-    }
-
-    private suspend fun createSmartScenario() {
-//        smartRepository.addScenario(
-//            Scenario(
-//                id = Identifier(databaseId = DATABASE_ID_INSERTION, tempId = 0L),
-//                name = "图形$DATABASE_ID_INSERTION",
-//                detectionQuality = 1200,
-//                randomize = false,
-//            )
-//        )
-//    }
 
 }

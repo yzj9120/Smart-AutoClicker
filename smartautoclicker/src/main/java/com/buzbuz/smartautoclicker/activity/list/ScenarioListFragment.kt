@@ -75,17 +75,14 @@ class ScenarioListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         /**
          * 设置视图绑定和点击事件监听器。
          */
         viewBinding.apply {
-
             list.adapter = scenariosAdapter
             emptyCreateButton.setOnClickListener { onCreateClicked() }
             add.setOnClickListener { onCreateClicked() }
             topAppBar.setOnMenuItemClickListener { onMenuItemSelected(it) }
-            scenarioListViewModel.createDumAndSmart()
             openOver.setOnClickListener {
                 (requireActivity() as? Listener)?.startScenario(scenariosAdapter.currentList[1])
             }

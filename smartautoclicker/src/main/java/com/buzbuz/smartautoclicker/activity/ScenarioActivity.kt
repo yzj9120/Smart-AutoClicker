@@ -26,12 +26,13 @@ import com.buzbuz.smartautoclicker.feature.revenue.UserConsentState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.gpt40.smartautoclicker.R
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 
 
 @AndroidEntryPoint
 class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
 
-    private  val TAG = "Hz:ScenarioActivity:"
+    private val TAG = "Hz:ScenarioActivity:"
 
     /** 提供点击场景数据给UI的ViewModel。 */
 
@@ -49,6 +50,8 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
         setContentView(R.layout.activity_scenario)
         scenarioViewModel.stopScenario()
         scenarioViewModel.requestUserConsent(this)
+
+        scenarioViewModel.createDumAndSmart();
 
         // 获取权限
 
@@ -68,7 +71,6 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
         findViewById<View>(android.R.id.content).delayDrawUntil {
             scenarioViewModel.userConsentState.value != UserConsentState.UNKNOWN
         }
-
 
 
     }
@@ -106,19 +108,19 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
     private fun showMediaProjectionWarning() {
         Log.d(TAG, "showMediaProjectionWarning:")
         ContextCompat.getSystemService(this, MediaProjectionManager::class.java)?.let { projectionManager ->
-                // 某些设备中，定义在com.android.internal.R.string.config_mediaProjectionPermissionDialogComponent的组件名称指定的请求权限对话框无效（例如，华为Honor6X Android 10）。
-                // 在这些情况下，没有办法使用这个应用程序。
-                try {
-                    projectionActivityResult.launch(projectionManager.createScreenCaptureIntent())
-                } catch (npe: NullPointerException) {
-                    showUnsupportedDeviceDialog()
-                } catch (ex: ActivityNotFoundException) {
-                    showUnsupportedDeviceDialog()
-                }
+            // 某些设备中，定义在com.android.internal.R.string.config_mediaProjectionPermissionDialogComponent的组件名称指定的请求权限对话框无效（例如，华为Honor6X Android 10）。
+            // 在这些情况下，没有办法使用这个应用程序。
+            try {
+                projectionActivityResult.launch(projectionManager.createScreenCaptureIntent())
+            } catch (npe: NullPointerException) {
+                showUnsupportedDeviceDialog()
+            } catch (ex: ActivityNotFoundException) {
+                showUnsupportedDeviceDialog()
             }
+        }
     }
 
-   /// 请求屏幕捕获权限，并处理不支持设备的异常。
+    /// 请求屏幕捕获权限，并处理不支持设备的异常。
     private fun showUnsupportedDeviceDialog() {
         MaterialAlertDialogBuilder(this).setTitle(R.string.dialog_overlay_title_warning)
             .setMessage(R.string.message_error_screen_capture_permission_dialog_not_found)
@@ -155,5 +157,12 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
 
         if (result) finish()
         else Toast.makeText(this, R.string.toast_denied_foreground_permission, Toast.LENGTH_SHORT).show()
+    }
+
+    suspend fun executeVoiceActions() {
+
+        delay(10000) // 延迟1秒
+
+
     }
 }

@@ -56,7 +56,7 @@ class OverlayManager @Inject internal constructor(
     private var navigateUpToRootCompletionListener: (() -> Unit)? = null
 
     /** Flow on the top of the overlay stack. Null if the stack is empty. */
-    val backStackTop: Flow<com.buzbuz.smartautoclicker.core.common.overlays.base.Overlay?> = isNavigating
+    val backStackTop: Flow<Overlay?> = isNavigating
         .filter { navigating -> !navigating }
         .combine(overlayBackStack.topFlow) { _, stackTop ->
             Log.d(TAG, "New back stack top: $stackTop")
@@ -69,13 +69,15 @@ class OverlayManager @Inject internal constructor(
         overlayBackStack.top
 
     /** Display the provided overlay and pause the current one, if any. */
-    fun navigateTo(context: Context, newOverlay: com.buzbuz.smartautoclicker.core.common.overlays.base.Overlay, hideCurrent: Boolean = false) {
+    fun navigateTo(context: Context, newOverlay:Overlay, hideCurrent: Boolean = false) {
         Log.d(
-            TAG, "Pushing NavigateTo request: HideCurrent=$hideCurrent, Overlay=${newOverlay.hashCode()}" +
+            TAG, "Pushing NavigateTo request: HideCurrent=$hideCurrent, Overlay=${newOverlay}" +
                     ", currently navigating: ${isNavigating.value}")
 
         overlayNavigationRequestStack.push(OverlayNavigationRequest.NavigateTo(newOverlay, hideCurrent))
         if (!isNavigating.value) executeNextNavigationRequest(context)
+
+
     }
 
     /** Destroys the currently shown overlay. */

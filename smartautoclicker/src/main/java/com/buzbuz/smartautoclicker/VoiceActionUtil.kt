@@ -4,15 +4,17 @@ import com.buzbuz.smartautoclicker.core.base.identifier.Identifier
 import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbAction
 
 import android.graphics.Point
+import com.buzbuz.smartautoclicker.core.base.identifier.DATABASE_ID_INSERTION
 import com.buzbuz.smartautoclicker.core.base.identifier.IdentifierCreator
 import com.buzbuz.smartautoclicker.core.dumb.domain.IDumbRepository
 import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbScenario
 import com.buzbuz.smartautoclicker.core.dumb.engine.DumbEngine
 import kotlinx.coroutines.delay
+import javax.inject.Inject
 
-class VoiceActionUtil(
+class VoiceActionUtil (
     private val dumbRepository: IDumbRepository,
-    private val DATABASE_ID_INSERTION: Long
+    private val dumbEngine: DumbEngine,
 ) {
     private val dumbActionsIdCreator = IdentifierCreator()
 
@@ -114,7 +116,11 @@ class VoiceActionUtil(
         pauseVoice()
         delay(1000) // 再延迟1秒
         closeVoice()
+    }
 
+    fun  onStartDumbScenario(){
+        dumbEngine.stopDumbScenario();
+        dumbEngine.startDumbScenario();
     }
 
 }

@@ -16,6 +16,8 @@
  */
 package com.buzbuz.smartautoclicker
 
+import android.annotation.SuppressLint
+import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.media.projection.MediaProjectionManager
@@ -67,20 +69,11 @@ class LocalService(
     internal var isStarted: Boolean = false
 
     override fun startDumbScenario(dumbScenario: DumbScenario) {
-
         Log.d(TAG, "startDumbScenario：${dumbScenario.toString()}")
-        if (isStarted) return
-        isStarted = true
-        onStart(false, dumbScenario.name)
-
-        displayMetrics.startMonitoring(context)
         startJob = serviceScope.launch {
             delay(500)
             dumbEngine.init(androidExecutor, dumbScenario)
-            overlayManager.navigateTo(
-                context = context,
-                newOverlay = DumbMainMenu(dumbScenario.id) { stop() },
-            )
+            dumbEngine.startDumbScenario();
         }
     }
 
@@ -98,6 +91,7 @@ class LocalService(
      * [android.app.Activity.onActivityResult]
      * @param scenario the identifier of the scenario of clicks to be used for detection.
      */
+    @SuppressLint("ServiceCast")
     override fun startSmartScenario(resultCode: Int, data: Intent, scenario: Scenario) {
 
         Log.d(TAG, "startSmartScenario：${scenario.toString()}")
@@ -110,14 +104,11 @@ class LocalService(
         displayMetrics.startMonitoring(context)
         startJob = serviceScope.launch {
             delay(500)
-
             detectionRepository.setScenarioId(scenario.id)
-
             overlayManager.navigateTo(
                 context = context,
                 newOverlay = MainMenu { stop() },
             )
-
             // If we start too quickly, there is a chance of crash because the service isn't in foreground state yet
             // That's not really an issue as the user just clicked the permission button and the activity is closing
             delay(1000)
@@ -153,6 +144,22 @@ class LocalService(
 
     override fun release() {
         serviceScope.cancel()
+    }
+
+    override fun openOverlayManager(dumbScenario: DumbScenario) {
+        Log.d(TAG, "openOverlayManager：${dumbScenario.toString()}")
+        if (isStarted) return
+        isStarted = true
+        onStart(false, dumbScenario.name)
+        startJob = serviceScope.launch {
+            delay(500)
+            displayMetrics.startMonitoring(context)
+            dumbEngine.init(androidExecutor, dumbScenario)
+            overlayManager.navigateTo(
+                context = context,
+                newOverlay = DumbMainMenu(dumbScenario.id) { stop() },
+            )
+        }
     }
 
     fun onKeyEvent(event: KeyEvent?): Boolean {
