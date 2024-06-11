@@ -68,6 +68,9 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
         findViewById<View>(android.R.id.content).delayDrawUntil {
             scenarioViewModel.userConsentState.value != UserConsentState.UNKNOWN
         }
+
+
+
     }
 
     override fun onResume() {
@@ -83,6 +86,10 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
             activity = this,
             onAllGranted = ::onMandatoryPermissionsGranted,
         )
+    }
+
+    override fun openOver() {
+
     }
 
     ///处理所有必要权限被授予的情况。它在需要时启动故障排除流程，然后启动适当的场景。

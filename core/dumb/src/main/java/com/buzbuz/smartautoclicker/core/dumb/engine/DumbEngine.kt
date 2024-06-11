@@ -71,7 +71,6 @@ class DumbEngine @Inject constructor(
     fun init(androidExecutor: AndroidExecutor, dumbScenario: DumbScenario) {
         dumbActionExecutor = DumbActionExecutor(androidExecutor)
         dumbScenarioDbId.value = dumbScenario.id.databaseId
-
         processingScope = CoroutineScope(Dispatchers.IO)
     }
 

@@ -76,9 +76,7 @@ class LocalService(
         displayMetrics.startMonitoring(context)
         startJob = serviceScope.launch {
             delay(500)
-
             dumbEngine.init(androidExecutor, dumbScenario)
-
             overlayManager.navigateTo(
                 context = context,
                 newOverlay = DumbMainMenu(dumbScenario.id) { stop() },

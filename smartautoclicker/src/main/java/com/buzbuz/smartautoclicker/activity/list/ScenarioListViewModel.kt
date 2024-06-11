@@ -3,15 +3,13 @@ package com.buzbuz.smartautoclicker.activity.list
 import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Point
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.buzbuz.smartautoclicker.VoiceActionUtil
 import com.buzbuz.smartautoclicker.core.base.identifier.DATABASE_ID_INSERTION
 import com.buzbuz.smartautoclicker.core.base.identifier.Identifier
-import com.buzbuz.smartautoclicker.core.base.identifier.IdentifierCreator
 
 import com.buzbuz.smartautoclicker.core.common.quality.domain.QualityRepository
 import com.buzbuz.smartautoclicker.core.domain.IRepository
@@ -22,10 +20,10 @@ import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbAction
 import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbScenario
 import com.buzbuz.smartautoclicker.core.dumb.domain.model.Repeatable
 import com.buzbuz.smartautoclicker.core.ui.utils.formatDuration
-import com.buzbuz.smartautoclicker.feature.dumb.config.domain.EditedDumbActionsBuilder
 import com.buzbuz.smartautoclicker.feature.revenue.IRevenueRepository
 import com.buzbuz.smartautoclicker.feature.revenue.UserBillingState
 import com.buzbuz.smartautoclicker.feature.smart.config.utils.getImageConditionBitmap
+import com.buzbuz.smartautoclicker.utils.SharedPreferencesUtil
 import com.gpt40.smartautoclicker.R
 
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -108,6 +106,10 @@ class ScenarioListViewModel @Inject constructor(
      * 它表示选择用于备份的场景标识符集合。
      */
     private val selectedForBackup = MutableStateFlow(ScenarioBackupSelection())
+
+
+    val sharedPreferencesUtil = SharedPreferencesUtil(context)
+
 
     /**
      * 这是一个 StateFlow<ScenarioListUiState?> 类型的属性。
@@ -359,9 +361,7 @@ class ScenarioListViewModel @Inject constructor(
         backupSelection: ScenarioBackupSelection,
     ): List<ScenarioListUiState.Item> = mapNotNull { item ->
 
-
         Log.d(TAG, "filterForBackupSelection.toItem=$this")
-
 
         when (item) {
             is ScenarioListUiState.Item.Valid.Dumb -> item.copy(
@@ -384,60 +384,32 @@ class ScenarioListViewModel @Inject constructor(
      * TODO
      */
     fun createDumAndSmart() {
-        viewModelScope.launch(Dispatchers.IO) {
-            createDumbScenario();
-            createSmartScenario();
+
+        val isCreateScenario = sharedPreferencesUtil.getBoolean("is_create_scenario")
+        if (!isCreateScenario) {
+            viewModelScope.launch(Dispatchers.IO) {
+                val voiceActionUtil = VoiceActionUtil(dumbRepository,  DATABASE_ID_INSERTION)
+                voiceActionUtil.executeVoiceActions()
+
+                createSmartScenario();
+                sharedPreferencesUtil.putBoolean("is_create_scenario", true)
+            }
         }
 
     }
 
-    /**
-     *
-     * [DumbClick(id=Identifier(databaseId=4, tempId=null), scenarioId=Identifier(databaseId=11, tempId=null), name=Click, priority=0, repeatCount=18, isRepeatInfinite=false, repeatDelayMs=5, position=Point(460, 1494), pressDurationMs=10)]
-     *
-     */
-    private suspend fun createDumbScenario() {
-         val dumbActionsIdCreator = IdentifierCreator()
-        val dumbActions: MutableList<DumbAction> = mutableListOf()
-        val dumbScenarioId = Identifier(databaseId = DATABASE_ID_INSERTION, tempId = 0L)
-        //在 1ms 期间重复 点击2次
-        val bean = DumbAction.DumbClick(
-            id = dumbActionsIdCreator.generateNewIdentifier(),
-            scenarioId = dumbScenarioId,
-            name = "Click",
-            priority = 0,//优先级
-            position = Point(486, 1518),// 坐标位置
-            pressDurationMs = 1,//单击持续时间（ms）
-            repeatCount = 2,//重复计数
-            isRepeatInfinite = true,
-            repeatDelayMs = 6,//重复延迟（ms)
-        )
-        // 直接添加元素
-        dumbActions.add(bean)
-        //DumbClick(id=Identifier(databaseId=0, tempId=1), scenarioId=Identifier(databaseId=1, tempId=null), name=Click, priority=0, repeatCount=1, isRepeatInfinite=false, repeatDelayMs=0, position=Point(310, 1487), pressDurationMs=1)
-        dumbRepository.addDumbScenario(
-            DumbScenario(
-                id = dumbScenarioId,
-                name = "坐标$DATABASE_ID_INSERTION",
-                dumbActions = dumbActions,    // 活动
-                repeatCount = 1, // 重复次数
-                isRepeatInfinite = false, //是否无限重复
-                maxDurationMin = 1,  // 最长延长时间 分钟
-                isDurationInfinite = true,
-                randomize = false, // 是否反作弊
-            )
-        )
+
     }
 
     private suspend fun createSmartScenario() {
-        smartRepository.addScenario(
-            Scenario(
-                id = Identifier(databaseId = DATABASE_ID_INSERTION, tempId = 0L),
-                name = "图形$DATABASE_ID_INSERTION",
-                detectionQuality = 1200,
-                randomize = false,
-            )
-        )
-    }
+//        smartRepository.addScenario(
+//            Scenario(
+//                id = Identifier(databaseId = DATABASE_ID_INSERTION, tempId = 0L),
+//                name = "图形$DATABASE_ID_INSERTION",
+//                detectionQuality = 1200,
+//                randomize = false,
+//            )
+//        )
+//    }
 
 }

@@ -65,6 +65,7 @@ import kotlin.coroutines.suspendCoroutine
  */
 @AndroidEntryPoint //注解用于指示 Dagger Hilt 进行依赖注入。
 class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
+    private val TAG = "Hz:AutoService:"
 
     companion object {
         /**此服务的前台通知的标识符*/
@@ -148,6 +149,8 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
             bitmapManager = bitmapManager,
             androidExecutor = this,
             onStart = { isSmart, name ->
+
+                      Log.d(TAG,"isSmart=$isSmart.....name=$isSmart")
                 qualityMetricsMonitor.onServiceForegroundStart()
                 currentScenarioName = name
                 if (isSmart) {
@@ -157,10 +160,7 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
                 requestFilterKeyEvents(true)
             },
             onStop = {
-                qualityMetricsMonitor.onServiceForegroundEnd()
-                currentScenarioName = null
-                requestFilterKeyEvents(false)
-                stopForeground(Service.STOP_FOREGROUND_REMOVE)
+//                   private val TAG = "Hz:LocalService:"
             },
         )
 

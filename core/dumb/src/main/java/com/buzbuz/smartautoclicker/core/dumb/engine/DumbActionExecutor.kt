@@ -18,6 +18,7 @@ package com.buzbuz.smartautoclicker.core.dumb.engine
 
 import android.accessibilityservice.GestureDescription
 import android.graphics.Path
+import android.util.Log
 
 import com.buzbuz.smartautoclicker.core.base.AndroidExecutor
 import com.buzbuz.smartautoclicker.core.base.extensions.buildSingleStroke
@@ -37,9 +38,14 @@ internal class DumbActionExecutor(private val androidExecutor: AndroidExecutor) 
 
     private val random: Random = Random(System.currentTimeMillis())
     private var randomize: Boolean = false
+    private val TAG = "Hz:DumbActionExecutor:"
 
     suspend fun executeDumbAction(action: DumbAction, randomize: Boolean) {
         this.randomize = randomize
+
+
+        Log.d(TAG, "ACTION=$action");
+
         when (action) {
             is DumbAction.DumbClick -> executeDumbClick(action)
             is DumbAction.DumbSwipe -> executeDumbSwipe(action)
@@ -79,6 +85,7 @@ internal class DumbActionExecutor(private val androidExecutor: AndroidExecutor) 
             }
         }
     }
+
     private fun Path.moveTo(x: Int, y: Int) {
         if (!randomize) safeMoveTo(x, y)
         else safeMoveTo(

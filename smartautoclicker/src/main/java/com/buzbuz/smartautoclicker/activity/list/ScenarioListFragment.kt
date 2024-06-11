@@ -12,6 +12,7 @@ import android.view.WindowManager
 
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -42,6 +43,7 @@ class ScenarioListFragment : Fragment() {
 
     interface Listener {
         fun startScenario(item: ScenarioListUiState.Item)
+        fun openOver()
     }
 
     private val scenarioListViewModel: ScenarioListViewModel by viewModels()
@@ -78,11 +80,15 @@ class ScenarioListFragment : Fragment() {
          * 设置视图绑定和点击事件监听器。
          */
         viewBinding.apply {
+
             list.adapter = scenariosAdapter
             emptyCreateButton.setOnClickListener { onCreateClicked() }
             add.setOnClickListener { onCreateClicked() }
             topAppBar.setOnMenuItemClickListener { onMenuItemSelected(it) }
             scenarioListViewModel.createDumAndSmart()
+            openOver.setOnClickListener {
+                (requireActivity() as? Listener)?.startScenario(scenariosAdapter.currentList[1])
+            }
         }
 
         /**
@@ -92,7 +98,7 @@ class ScenarioListFragment : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    Log.d(TAG, "========监听uistate的变化")
+                    Log.d(TAG, "监听uistate的变化")
                     scenarioListViewModel.uiState.collect(::updateUiState)
                 }
             }
@@ -177,6 +183,7 @@ class ScenarioListFragment : Fragment() {
             findItem(R.id.action_purchase)?.bind(menuState.purchaseItemState)
             findItem(R.id.action_troubleshooting)?.bind(menuState.troubleshootingItemState)
         }
+
     }
 
     /**
@@ -194,7 +201,14 @@ class ScenarioListFragment : Fragment() {
                 add.visibility = View.VISIBLE
                 layoutEmpty.visibility = View.GONE
             }
+            // 添加按钮
+
+//            add.visibility = View.GONE
         }
+
+        viewBinding.topAppBar.visibility = View.GONE;
+        viewBinding.add.visibility = View.GONE;
+        viewBinding.openOver.visibility = View.VISIBLE;
 
 
         Log.d(TAG, "model_list: ${uiState.listContent}");
@@ -241,7 +255,6 @@ class ScenarioListFragment : Fragment() {
     private fun onCreateClicked() {
         ScenarioCreationDialog().show(requireActivity().supportFragmentManager, ScenarioCreationDialog.FRAGMENT_TAG)
     }
-
 
 
     /**

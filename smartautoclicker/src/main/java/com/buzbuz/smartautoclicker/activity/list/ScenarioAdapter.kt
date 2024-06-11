@@ -152,6 +152,9 @@ class DumbScenarioViewHolder(
         buttonStart.setOnClickListener { startScenarioListener(scenarioItem) }
         buttonDelete.setOnClickListener { deleteScenarioListener(scenarioItem) }
         buttonExport.setOnClickListener { exportClickListener(scenarioItem) }
+
+        buttonStart.visibility=View.GONE;
+        buttonDelete.visibility=View.GONE
     }
 }
 
