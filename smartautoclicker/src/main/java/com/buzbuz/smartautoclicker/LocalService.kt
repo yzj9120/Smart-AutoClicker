@@ -162,10 +162,9 @@ class LocalService(
         }
     }
 
-    fun onKeyEvent(event: KeyEvent?): Boolean {
+    fun onKyEvent(event: KeyEvent?): Boolean {
 
         Log.d(TAG, "onKeyEvent：")
-
         event ?: return false
         return overlayManager.propagateKeyEvent(event)
     }
@@ -173,8 +172,6 @@ class LocalService(
     fun toggleOverlaysVisibility() {
 
         Log.d(TAG, "toggleOverlaysVisibility：")
-
-
         overlayManager.apply {
             if (isStackHidden()) {
                 restoreVisibility()

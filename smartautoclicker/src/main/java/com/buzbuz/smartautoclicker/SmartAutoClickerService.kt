@@ -29,6 +29,7 @@ import android.util.AndroidRuntimeException
 import android.util.Log
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
 
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -208,7 +209,7 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
      * 处理按键事件
      */
     override fun onKeyEvent(event: KeyEvent?): Boolean =
-        localService?.onKeyEvent(event) ?: super.onKeyEvent(event)
+      false
 
     /**
      * 创建通知渠道
@@ -342,10 +343,31 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
     override fun onInterrupt() { /* Unused */
     }
 
-    override fun onAccessibilityEvent(event: AccessibilityEvent?) { /* Unused */
-
-
+    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+        /**
+         * PackageName: com.openai.chatgpt; MovementGranularity
+         *  聊天首页： Text       contentDescription: 听写 ，开始语音对话 ，开始新聊天，编辑菜单
+         *  语音页面：Text 正在关联   (状态1: 加载汇中.....New Voice Mode coming soon  结束语音对话 停止)
+         *
+         */
         Log.d(TAG, "onAccessibilityEvent：${event}")
+        val rootNode = rootInActiveWindow
+        rootNode?.let { traverseNode(it) }
+    }
+
+
+
+    private fun traverseNode(node: AccessibilityNodeInfo?) {
+        if (node == null) return
+
+        Log.d(TAG, "Node  Text:${node.getText().toString()}  contentDescription:${node.contentDescription}......${node.viewIdResourceName}....${node.className}")
+        // 处理节点信息，例如打印节点文本
+//        if (node.getText() != null) {
+//            Log.d(TAG, "Node Text: " + node.getText().toString())
+//        }
+        for (i in 0 until node.childCount) {
+            traverseNode(node.getChild(i))
+        }
     }
 }
 

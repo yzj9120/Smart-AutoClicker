@@ -55,7 +55,6 @@ class DumbMainMenu(
 
     /** View binding for the content of the overlay. */
     private lateinit var viewBinding: OverlayDumbMainMenuBinding
-
     /** Controls the animations of the play/pause button. */
     private lateinit var playPauseButtonController: AnimatedStatesImageButtonController
 
@@ -89,9 +88,6 @@ class DumbMainMenu(
             playPauseButtonController.attachView(btnPlay)
         }
 
-        viewBinding.btnActionList.visibility = View.GONE;
-        viewBinding.btnShowActions.visibility = View.GONE;
-        viewBinding.btnMove.visibility = View.GONE;
         return viewBinding.root
     }
 
@@ -128,15 +124,10 @@ class DumbMainMenu(
         setMenuItemViewEnabled(viewBinding.btnPlay, canStartDetection)
 
     private fun updateMenuPlayingState(isPlaying: Boolean) {
-
-
-
         val currentState = viewBinding.btnPlay.tag
         if (currentState == isPlaying) return
 
         viewBinding.btnPlay.tag = isPlaying
-
-//
 //        if (isPlaying) {
 //            if (currentState == null) {
 //                playPauseButtonController.toState2(false)
@@ -161,11 +152,9 @@ class DumbMainMenu(
 //            }
 //        }
 
-
-
-        viewBinding.btnActionList.visibility = View.GONE;
-        viewBinding.btnShowActions.visibility = View.GONE;
-        viewBinding.btnMove.visibility = View.GONE;
+        viewBinding.btnActionList.visibility=View.GONE
+        viewBinding.btnShowActions.visibility=View.GONE
+        viewBinding.btnActionList.visibility=View.GONE
     }
 
     override fun onMenuItemClicked(viewId: Int) {
