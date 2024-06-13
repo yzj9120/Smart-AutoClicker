@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -48,6 +49,9 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scenario)
+
+        enableEdgeToEdge()
+
         scenarioViewModel.stopScenario()
         scenarioViewModel.requestUserConsent(this)
 
@@ -71,6 +75,11 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
         findViewById<View>(android.R.id.content).delayDrawUntil {
             scenarioViewModel.userConsentState.value != UserConsentState.UNKNOWN
         }
+//
+//        scenarioViewModel.setRecordAudioParameters()
+//        scenarioViewModel.setPlaybackAudioParameters()
+        scenarioViewModel.setupNERtc(applicationContext)
+        scenarioViewModel.joinChannel()
 
 
     }

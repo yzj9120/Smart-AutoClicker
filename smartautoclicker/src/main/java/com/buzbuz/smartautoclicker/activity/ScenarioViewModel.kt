@@ -25,6 +25,8 @@ import android.content.Intent
 import android.graphics.Point
 import android.os.Build
 import android.util.Log
+import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 import androidx.core.content.PermissionChecker
@@ -52,10 +54,30 @@ import com.buzbuz.smartautoclicker.feature.revenue.IRevenueRepository
 import com.buzbuz.smartautoclicker.feature.revenue.UserConsentState
 import com.buzbuz.smartautoclicker.utils.SharedPreferencesUtil
 import com.gpt40.smartautoclicker.R
+import com.netease.lava.nertc.sdk.NERtc
+import com.netease.lava.nertc.sdk.NERtcCallback
+import com.netease.lava.nertc.sdk.NERtcConstants
+import com.netease.lava.nertc.sdk.NERtcEx
+import com.netease.lava.nertc.sdk.NERtcOption
+import com.netease.lava.nertc.sdk.NERtcParameters
+import com.netease.lava.nertc.sdk.NERtcUserJoinExtraInfo
+import com.netease.lava.nertc.sdk.NERtcUserLeaveExtraInfo
+import com.netease.lava.nertc.sdk.audio.NERtcAudioFrameOpMode
+import com.netease.lava.nertc.sdk.audio.NERtcAudioFrameRequestFormat
+import com.netease.lava.nertc.sdk.stats.NERtcAudioRecvStats
+import com.netease.lava.nertc.sdk.stats.NERtcAudioSendStats
+import com.netease.lava.nertc.sdk.stats.NERtcNetworkQualityInfo
+import com.netease.lava.nertc.sdk.stats.NERtcStats
+import com.netease.lava.nertc.sdk.stats.NERtcStatsObserver
+import com.netease.lava.nertc.sdk.stats.NERtcVideoRecvStats
+import com.netease.lava.nertc.sdk.stats.NERtcVideoSendStats
+import com.netease.lite.BuildConfig
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -73,10 +95,12 @@ class ScenarioViewModel @Inject constructor(
     private val permissionController: PermissionsController,
     private val dumbEngine: DumbEngine,
 
-    ) : ViewModel() {
+    ) : ViewModel(), NERtcCallback {
 
     private val TAG = "Hz:ScenarioViewModel:"
-
+    private val APP_KEY = "3c4f31f7f277ac27ec689b97b304da6d"
+    private val userId = 666888123456789
+    private val roomId = "5566"
     val sharedPreferencesUtil = SharedPreferencesUtil(context)
 
 
@@ -220,6 +244,214 @@ class ScenarioViewModel @Inject constructor(
 //    }
 
     }
+
+     fun setRecordAudioParameters() {
+        val formatMix = NERtcAudioFrameRequestFormat()
+        //单声道、双声道
+        formatMix.channels = 1
+        //采样率
+        formatMix.sampleRate = 32000
+        //读写权限
+        formatMix.opMode = NERtcAudioFrameOpMode.kNERtcAudioFrameOpModeReadWrite
+        NERtcEx.getInstance().setRecordingAudioFrameParameters(formatMix)
+    }
+     fun setPlaybackAudioParameters() {
+        val formatMix = NERtcAudioFrameRequestFormat()
+        //单声道、双声道
+        formatMix.channels = 1
+        //采样率
+        formatMix.sampleRate = 32000
+        //读写权限
+        formatMix.opMode = NERtcAudioFrameOpMode.kNERtcAudioFrameOpModeReadWrite
+        NERtcEx.getInstance().setPlaybackAudioFrameParameters(formatMix)
+    }
+
+    fun setupNERtc(context: Context) {
+        val parameters = NERtcParameters()
+        NERtcEx.getInstance().setParameters(parameters) //先设置参数，后初始化
+        val options = NERtcOption()
+        if (BuildConfig.DEBUG) {
+            options.logLevel = NERtcConstants.LogLevel.INFO
+        } else {
+            options.logLevel = NERtcConstants.LogLevel.WARNING
+        }
+        try {
+            NERtcEx.getInstance().init(context, APP_KEY, this, options)
+        } catch (e: Exception) {
+            // 可能由于没有release导致初始化失败，release后再试一次
+            NERtcEx.getInstance().release()
+            try {
+                NERtcEx.getInstance().init(context, APP_KEY, this, options)
+            } catch (ex: Exception) {
+                Toast.makeText(context, "SDK初始化失败", Toast.LENGTH_LONG).show()
+                return
+            }
+        }
+        //设置质量透明回调
+        NERtcEx.getInstance().setStatsObserver(object : NERtcStatsObserver {
+            override fun onRtcStats(neRtcStats: NERtcStats) {
+                //  Log.d(TAG, "onRtcStats:" + neRtcStats.toString())
+
+            }
+
+            override fun onLocalAudioStats(neRtcAudioSendStats: NERtcAudioSendStats) {
+
+                Log.d(TAG, "onLocalAudioStats:" + neRtcAudioSendStats.toString())
+            }
+
+            override fun onRemoteAudioStats(neRtcAudioRecvStats: Array<NERtcAudioRecvStats>) {
+//                Log.d(TAG, "onRemoteAudioStats:" + neRtcAudioRecvStats.size)
+//                val tmp = neRtcAudioRecvStats[0].layers[0]
+//                Log.d(TAG, "音量:" + tmp.volume)
+
+            }
+
+            override fun onLocalVideoStats(neRtcVideoSendStats: NERtcVideoSendStats) {}
+            override fun onRemoteVideoStats(neRtcVideoRecvStats: Array<NERtcVideoRecvStats>) {}
+            override fun onNetworkQuality(neRtcNetworkQualityInfos: Array<NERtcNetworkQualityInfo>) {
+//                Log.d(TAG, "onNetworkQuality:" + neRtcNetworkQualityInfos.size)
+//                val tmp = neRtcNetworkQualityInfos[0]
+//                Log.d(TAG, "网络质量:" + NetQuality.getMsg(tmp.downStatus) + "---")
+            }
+        })
+
+//        NERtcEx.getInstance().setAudioFrameObserver(object : NERtcAudioFrameObserver {
+//            override fun onRecordFrame(neRtcAudioFrame: NERtcAudioFrame) {
+//                Log.d(
+//                    TAG, "onRecordFrame:" + neRtcAudioFrame.data
+//                )
+//            }
+//
+//            override fun onRecordSubStreamAudioFrame(neRtcAudioFrame: NERtcAudioFrame) {
+//                Log.d(
+//                    TAG, "onRecordSubStreamAudioFrame:" + neRtcAudioFrame.data
+//                )
+//            }
+//
+//            override fun onPlaybackFrame(neRtcAudioFrame: NERtcAudioFrame) {
+//                Log.d(
+//                    TAG, "onPlaybackFrame"
+//                )
+//            }
+//
+//            override fun onPlaybackAudioFrameBeforeMixingWithUserID(
+//                l: Long, neRtcAudioFrame: NERtcAudioFrame
+//            ) {
+//                Log.d(
+//                    TAG, "onPlaybackAudioFrameBeforeMixingWithUserID"
+//                )
+//            }
+//
+//            override fun onPlaybackAudioFrameBeforeMixingWithUserID(
+//                l: Long, neRtcAudioFrame: NERtcAudioFrame, l1: Long
+//            ) {
+//                Log.d(
+//                    TAG, "onPlaybackAudioFrameBeforeMixingWithUserID"
+//                )
+//            }
+//
+//            override fun onMixedAudioFrame(neRtcAudioFrame: NERtcAudioFrame) {
+//                Log.d(
+//                    TAG, "onMixedAudioFrame"
+//                )
+//            }
+//
+//            override fun onPlaybackSubStreamAudioFrameBeforeMixingWithUserID(
+//                l: Long, neRtcAudioFrame: NERtcAudioFrame, l1: Long
+//            ) {
+//                Log.d(
+//                    TAG, "onPlaybackSubStreamAudioFrameBeforeMixingWithUserID"
+//                )
+//            }
+//        })
+        setLocalAudioEnable(true)
+    }
+    /**
+     * 设置本地音频可用性
+     *
+     * @param enable
+     */
+    private fun setLocalAudioEnable(enable: Boolean) {
+        NERtcEx.getInstance().enableLocalAudio(enable)
+        NERtc.getInstance().setAudioProfile(
+            NERtcConstants.AudioScenario.SPEECH, NERtcConstants.AudioProfile.MIDDLE_QUALITY
+        )
+
+    }
+
+    /**
+     * 加入房间
+     *
+     * @param userId 用户ID
+     * @param roomId 房间ID
+     */
+    fun joinChannel() {
+        Log.i(TAG, "joinChannel userId: $userId")
+        NERtcEx.getInstance().joinChannel(null, roomId, userId)
+    }
+
+    private fun leaveChannel(): Boolean {
+        setLocalAudioEnable(false)
+        val ret: Int = NERtcEx.getInstance().leaveChannel()
+        return ret == NERtcConstants.ErrorCode.OK
+    }
+    override fun onJoinChannel(result: Int, channelId: Long, elapsed: Long, l2: Long) {
+        Log.i(TAG, "onJoinChannel result: $result channelId: $channelId elapsed: $elapsed")
+        if (result == NERtcConstants.ErrorCode.OK) {
+            MainScope().launch {
+                delay(2000) // 延时2秒
+            }
+        }
+    }
+
+    override fun onLeaveChannel(result: Int) {
+        Log.i(TAG, "onLeaveChannel result: $result")
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onUserJoined(userId: Long) {
+        Log.i(TAG, "onUserJoined userId: $userId ")
+    }
+
+    override fun onUserJoined(uid: Long, joinExtraInfo: NERtcUserJoinExtraInfo?) {
+        Log.i(TAG, "onUserJoined uid: $uid")
+
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onUserLeave(userId: Long, i: Int) {
+        Log.i(TAG, "onUserLeave uid: $userId")
+
+    }
+
+
+    override fun onUserLeave(uid: Long, reason: Int, leaveExtraInfo: NERtcUserLeaveExtraInfo?) {}
+
+    override fun onUserAudioStart(userId: Long) {
+        Log.i(TAG, "onUserAudioStart uid: $userId")
+        NERtcEx.getInstance().subscribeRemoteAudioStream(userId, true)
+    }
+
+    override fun onUserAudioStop(userId: Long) {
+        Log.i(TAG, "onUserAudioStop uid: $userId")
+        NERtcEx.getInstance().subscribeRemoteAudioStream(userId, false)
+    }
+
+    override fun onUserVideoStart(userId: Long, profile: Int) {
+    }
+
+    override fun onUserVideoStop(userId: Long) {
+    }
+
+    override fun onDisconnect(i: Int) {
+        Log.i(TAG, "onDisconnect uid: $i")
+
+    }
+
+    override fun onClientRoleChange(old: Int, newRole: Int) {
+        Log.i(TAG, "onUserAudioStart old: $old, newRole : $newRole")
+    }
+
 
 }
 

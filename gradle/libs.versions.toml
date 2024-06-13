@@ -52,6 +52,7 @@ mockitoKotlin = "5.1.0"
 mockk = "1.13.10"
 robolectric = "4.11.1"
 
+nertc = "5.4.0"
 
 [libraries]
 
@@ -118,6 +119,7 @@ androidx-arch-core-testing = { group = "androidx.arch.core", name = "core-testin
 androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "androidxRoom" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 
+nertc = { module = "com.netease.yunxin:nertc", version.ref = "nertc" }
 
 [plugins]
 

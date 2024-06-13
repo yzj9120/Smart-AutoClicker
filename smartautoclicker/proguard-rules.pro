@@ -41,3 +41,7 @@
     public static int d(...);
     public static int v(...);
 }
+
+
+-keep class com.netease.lava.** {*;}
+-keep class com.netease.yunxin.** {*;}
