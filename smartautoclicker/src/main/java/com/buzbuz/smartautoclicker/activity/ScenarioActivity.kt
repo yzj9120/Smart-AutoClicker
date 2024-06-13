@@ -1,5 +1,6 @@
 package com.buzbuz.smartautoclicker.activity
 
+import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.DialogInterface
 import android.content.Intent
@@ -15,6 +16,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 import com.buzbuz.smartautoclicker.activity.list.ScenarioListFragment
@@ -26,6 +28,7 @@ import com.buzbuz.smartautoclicker.feature.revenue.UserConsentState
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.gpt40.smartautoclicker.R
+import com.netease.lava.nertc.sdk.NERtc
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 
@@ -75,15 +78,22 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
         findViewById<View>(android.R.id.content).delayDrawUntil {
             scenarioViewModel.userConsentState.value != UserConsentState.UNKNOWN
         }
-//
-//        scenarioViewModel.setRecordAudioParameters()
-//        scenarioViewModel.setPlaybackAudioParameters()
+        requestPermissionsIfNeeded(this);
+        scenarioViewModel.setRecordAudioParameters()
+        scenarioViewModel.setPlaybackAudioParameters()
         scenarioViewModel.setupNERtc(applicationContext)
         scenarioViewModel.joinChannel()
 
 
     }
-
+    private fun requestPermissionsIfNeeded(context: Activity?) {
+        val missedPermissions = NERtc.checkPermission(context)
+        if (missedPermissions.size > 0) {
+            ActivityCompat.requestPermissions(
+                context!!, missedPermissions.toTypedArray<String>(), 100
+            )
+        }
+    }
     override fun onResume() {
         super.onResume()
         scenarioViewModel.refreshPurchaseState()
