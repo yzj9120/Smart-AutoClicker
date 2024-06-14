@@ -128,6 +128,7 @@ class DumbMainMenu(
         if (currentState == isPlaying) return
 
         viewBinding.btnPlay.tag = isPlaying
+//
 //        if (isPlaying) {
 //            if (currentState == null) {
 //                playPauseButtonController.toState2(false)
@@ -144,17 +145,18 @@ class DumbMainMenu(
 //                playPauseButtonController.toState1(false)
 //            } else {
 //                animateLayoutChanges {
-//                    setMenuItemVisibility(viewBinding.btnStop, true)
-//                    setMenuItemVisibility(viewBinding.btnShowActions, true)
+//                    setMenuItemVisibility(viewBinding.btnStop, false)
+//                    setMenuItemVisibility(viewBinding.btnShowActions, false)
 //                    setMenuItemVisibility(viewBinding.btnActionList, true)
 //                    playPauseButtonController.toState1(true)
 //                }
 //            }
 //        }
-
-        viewBinding.btnActionList.visibility=View.GONE
+//
+        viewBinding.btnActionList.visibility=View.VISIBLE
         viewBinding.btnShowActions.visibility=View.GONE
-        viewBinding.btnActionList.visibility=View.GONE
+        viewBinding.btnPlay.visibility=View.GONE
+        viewBinding.btnStop.visibility=View.GONE
     }
 
     override fun onMenuItemClicked(viewId: Int) {

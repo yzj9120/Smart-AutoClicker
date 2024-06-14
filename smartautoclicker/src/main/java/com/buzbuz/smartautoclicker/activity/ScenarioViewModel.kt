@@ -100,7 +100,8 @@ class ScenarioViewModel @Inject constructor(
     private val TAG = "Hz:ScenarioViewModel:"
     private val APP_KEY = "3c4f31f7f277ac27ec689b97b304da6d"
     private val userId = 666888123456789
-    private val roomId = "5566"
+    private val userId2 = 3333333
+    private val roomId = "123456789"
     val sharedPreferencesUtil = SharedPreferencesUtil(context)
 
 
@@ -196,12 +197,14 @@ class ScenarioViewModel @Inject constructor(
         return true
     }
 
+    var bean: DumbScenario? = null;
     fun loadDumbScenario(context: Context, scenario: DumbScenario): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val foregroundPermission =
                 PermissionChecker.checkSelfPermission(context, Manifest.permission.FOREGROUND_SERVICE)
             if (foregroundPermission != PermissionChecker.PERMISSION_GRANTED) return false
         }
+        bean = scenario;
 
         clickerService?.openOverlayManager(scenario)
         return true
@@ -211,6 +214,10 @@ class ScenarioViewModel @Inject constructor(
 
     fun stopScenario() {
         clickerService?.stop()
+    }
+
+    fun startDumbScenario() {
+        bean?.let { clickerService?.startDumbScenario(it) };
     }
 
 
@@ -245,7 +252,7 @@ class ScenarioViewModel @Inject constructor(
 
     }
 
-     fun setRecordAudioParameters() {
+    fun setRecordAudioParameters() {
         val formatMix = NERtcAudioFrameRequestFormat()
         //单声道、双声道
         formatMix.channels = 1
@@ -255,7 +262,8 @@ class ScenarioViewModel @Inject constructor(
         formatMix.opMode = NERtcAudioFrameOpMode.kNERtcAudioFrameOpModeReadWrite
         NERtcEx.getInstance().setRecordingAudioFrameParameters(formatMix)
     }
-     fun setPlaybackAudioParameters() {
+
+    fun setPlaybackAudioParameters() {
         val formatMix = NERtcAudioFrameRequestFormat()
         //单声道、双声道
         formatMix.channels = 1
@@ -269,12 +277,16 @@ class ScenarioViewModel @Inject constructor(
     fun setupNERtc(context: Context) {
         val parameters = NERtcParameters()
         NERtcEx.getInstance().setParameters(parameters) //先设置参数，后初始化
+
+
         val options = NERtcOption()
+
         if (BuildConfig.DEBUG) {
             options.logLevel = NERtcConstants.LogLevel.INFO
         } else {
             options.logLevel = NERtcConstants.LogLevel.WARNING
         }
+
         try {
             NERtcEx.getInstance().init(context, APP_KEY, this, options)
         } catch (e: Exception) {
@@ -288,32 +300,32 @@ class ScenarioViewModel @Inject constructor(
             }
         }
         //设置质量透明回调
-        NERtcEx.getInstance().setStatsObserver(object : NERtcStatsObserver {
-            override fun onRtcStats(neRtcStats: NERtcStats) {
-                //  Log.d(TAG, "onRtcStats:" + neRtcStats.toString())
-
-            }
-
-            override fun onLocalAudioStats(neRtcAudioSendStats: NERtcAudioSendStats) {
-
-                Log.d(TAG, "onLocalAudioStats:" + neRtcAudioSendStats.toString())
-            }
-
-            override fun onRemoteAudioStats(neRtcAudioRecvStats: Array<NERtcAudioRecvStats>) {
-//                Log.d(TAG, "onRemoteAudioStats:" + neRtcAudioRecvStats.size)
-//                val tmp = neRtcAudioRecvStats[0].layers[0]
-//                Log.d(TAG, "音量:" + tmp.volume)
-
-            }
-
-            override fun onLocalVideoStats(neRtcVideoSendStats: NERtcVideoSendStats) {}
-            override fun onRemoteVideoStats(neRtcVideoRecvStats: Array<NERtcVideoRecvStats>) {}
-            override fun onNetworkQuality(neRtcNetworkQualityInfos: Array<NERtcNetworkQualityInfo>) {
-//                Log.d(TAG, "onNetworkQuality:" + neRtcNetworkQualityInfos.size)
-//                val tmp = neRtcNetworkQualityInfos[0]
-//                Log.d(TAG, "网络质量:" + NetQuality.getMsg(tmp.downStatus) + "---")
-            }
-        })
+//        NERtcEx.getInstance().setStatsObserver(object : NERtcStatsObserver {
+//            override fun onRtcStats(neRtcStats: NERtcStats) {
+//                //  Log.d(TAG, "onRtcStats:" + neRtcStats.toString())
+//
+//            }
+//
+//            override fun onLocalAudioStats(neRtcAudioSendStats: NERtcAudioSendStats) {
+//
+//                Log.d(TAG, "onLocalAudioStats:" + neRtcAudioSendStats.toString())
+//            }
+//
+//            override fun onRemoteAudioStats(neRtcAudioRecvStats: Array<NERtcAudioRecvStats>) {
+////                Log.d(TAG, "onRemoteAudioStats:" + neRtcAudioRecvStats.size)
+////                val tmp = neRtcAudioRecvStats[0].layers[0]
+////                Log.d(TAG, "音量:" + tmp.volume)
+//
+//            }
+//
+//            override fun onLocalVideoStats(neRtcVideoSendStats: NERtcVideoSendStats) {}
+//            override fun onRemoteVideoStats(neRtcVideoRecvStats: Array<NERtcVideoRecvStats>) {}
+//            override fun onNetworkQuality(neRtcNetworkQualityInfos: Array<NERtcNetworkQualityInfo>) {
+////                Log.d(TAG, "onNetworkQuality:" + neRtcNetworkQualityInfos.size)
+////                val tmp = neRtcNetworkQualityInfos[0]
+////                Log.d(TAG, "网络质量:" + NetQuality.getMsg(tmp.downStatus) + "---")
+//            }
+//        })
 
 //        NERtcEx.getInstance().setAudioFrameObserver(object : NERtcAudioFrameObserver {
 //            override fun onRecordFrame(neRtcAudioFrame: NERtcAudioFrame) {
@@ -364,14 +376,14 @@ class ScenarioViewModel @Inject constructor(
 //                )
 //            }
 //        })
-        setLocalAudioEnable(true)
     }
+
     /**
      * 设置本地音频可用性
      *
      * @param enable
      */
-    private fun setLocalAudioEnable(enable: Boolean) {
+    fun setLocalAudioEnable(enable: Boolean) {
         NERtcEx.getInstance().enableLocalAudio(enable)
         NERtc.getInstance().setAudioProfile(
             NERtcConstants.AudioScenario.SPEECH, NERtcConstants.AudioProfile.MIDDLE_QUALITY
@@ -395,6 +407,7 @@ class ScenarioViewModel @Inject constructor(
         val ret: Int = NERtcEx.getInstance().leaveChannel()
         return ret == NERtcConstants.ErrorCode.OK
     }
+
     override fun onJoinChannel(result: Int, channelId: Long, elapsed: Long, l2: Long) {
         Log.i(TAG, "onJoinChannel result: $result channelId: $channelId elapsed: $elapsed")
         if (result == NERtcConstants.ErrorCode.OK) {
@@ -411,6 +424,11 @@ class ScenarioViewModel @Inject constructor(
     @Deprecated("Deprecated in Java")
     override fun onUserJoined(userId: Long) {
         Log.i(TAG, "onUserJoined userId: $userId ")
+
+        if (userId.toInt() == userId2) {
+            startDumbScenario()
+        }
+
     }
 
     override fun onUserJoined(uid: Long, joinExtraInfo: NERtcUserJoinExtraInfo?) {

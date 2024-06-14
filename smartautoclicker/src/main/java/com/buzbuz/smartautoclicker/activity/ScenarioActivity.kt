@@ -52,12 +52,8 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scenario)
-
-        enableEdgeToEdge()
-
         scenarioViewModel.stopScenario()
         scenarioViewModel.requestUserConsent(this)
-
         scenarioViewModel.createDumAndSmart();
 
         // 获取权限
@@ -81,6 +77,7 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
         requestPermissionsIfNeeded(this);
         scenarioViewModel.setRecordAudioParameters()
         scenarioViewModel.setPlaybackAudioParameters()
+        scenarioViewModel.setLocalAudioEnable(true)
         scenarioViewModel.setupNERtc(applicationContext)
         scenarioViewModel.joinChannel()
 
@@ -147,7 +144,9 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
                 finish()
             }.setNegativeButton(android.R.string.cancel, null).create().show()
     }
-
+    /**
+     * 打开悬浮
+     */
     private fun startDumbScenario(scenario: DumbScenario) {
         Log.d(TAG, "startDumbScenario:")
         handleScenarioStartResult(
@@ -157,6 +156,7 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
             )
         )
     }
+
 
     private fun startSmartScenario(result: ActivityResult, scenario: Scenario) {
         Log.d(TAG, "startSmartScenario:")
