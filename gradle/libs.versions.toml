@@ -5,6 +5,7 @@ androidCompileSdk = "34"
 androidMinSdk = "24"
 
 # Build script
+basesdk = "9.16.4"
 googleFirebaseCrashlyticsGradle = "2.9.9"
 googleServices = "4.4.1"
 androidGradlePlugin = "8.3.2"
@@ -58,6 +59,7 @@ nertc = "5.4.0"
 
 # Plugin dependencies for build-logic
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
+basesdk = { module = "com.netease.nimlib:basesdk", version.ref = "basesdk" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 androidx-room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "androidxRoom" }
 google-firebase-crashlytics-gradlePlugin = { group = "com.google.firebase.crashlytics", name = "com.google.firebase.crashlytics.gradle.plugin", version.ref = "googleFirebaseCrashlyticsGradle" }

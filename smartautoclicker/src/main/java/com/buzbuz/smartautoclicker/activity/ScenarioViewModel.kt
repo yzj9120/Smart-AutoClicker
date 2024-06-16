@@ -201,26 +201,6 @@ class ScenarioViewModel @Inject constructor(
     fun startDumbScenario() {
         bean?.let { clickerService?.startDumbScenario(it) };
     }
-
-    fun openGpt() {
-        val packageName = "com.openai.chatgpt" // 替换为你要打开的应用的包名
-        if (AppUtil.isAppInstalled(mContext, packageName)) {
-            AppUtil.openAppByPackageName(mContext, packageName, object : AppLaunchListener {
-                override fun onAppLaunchSuccess() {
-                    Toast.makeText(mContext, "ok", Toast.LENGTH_SHORT).show()
-                    startDumbScenario()
-                }
-
-                override fun onAppLaunchFailed() {
-                    Toast.makeText(mContext, "fail", Toast.LENGTH_SHORT).show()
-                }
-            })
-        } else {
-            Toast.makeText(mContext, "App is not installed", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-
     /**
      *
      * 一键添加数据 ：

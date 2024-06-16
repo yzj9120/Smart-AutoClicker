@@ -152,8 +152,6 @@ class LocalService(
     }
 
     override fun gptLiner(nodeInfoList: MutableList<NodeInfo>) {
-        // var node1str:String ="听写,开始语音对话,开始新聊天,编辑菜单"
-        var node1str2: String = ","
         val nodeInfoListTarget = mutableListOf(
             NodeInfo("听写", ""),
             NodeInfo("开始语音对话", ""),
