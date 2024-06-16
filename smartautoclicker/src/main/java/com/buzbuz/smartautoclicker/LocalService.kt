@@ -152,13 +152,35 @@ class LocalService(
     }
 
     override fun gptLiner(nodeInfoList: MutableList<NodeInfo>) {
-        if (nodeInfoList.contains(NodeInfo("", "听写,开始语音对话,开始新聊天,编辑菜单"))) {
-            println("列表中包含文本为 '聊天的节点信息")
-        } else if (nodeInfoList.contains(NodeInfo("正在关联", "结束语音对话，停止"))) {
-            println("列表中包含文本为 '语言的节点信息")
-        }else{
-            println("列表中包含文本为 '未知")
+        // var node1str:String ="听写,开始语音对话,开始新聊天,编辑菜单"
+        var node1str2: String = ","
+        val nodeInfoListTarget = mutableListOf(
+            NodeInfo("听写", ""),
+            NodeInfo("开始语音对话", ""),
+            NodeInfo("开始新聊天", ""),
+            NodeInfo("编辑菜单", "")
+        )
+        val nodeInfoListTarget2 = mutableListOf(
+            NodeInfo("结束语音对话", ""),
+            NodeInfo("停止", "")
+        )
+
+        if (nodeInfoList.any { node ->
+                nodeInfoListTarget.any { target ->
+                    node.contentDescription.contains(target.text)
+                }
+            }) {
+            Log.d(TAG, "文字聊天：")
+        } else if (nodeInfoList.any { node ->
+                nodeInfoListTarget2.any { target ->
+                    node.contentDescription.contains(target.text)
+                }
+            }) {
+            Log.d(TAG, "语言聊天：")
+        } else {
+            Log.d(TAG, "未知：")
         }
+
 
     }
 
