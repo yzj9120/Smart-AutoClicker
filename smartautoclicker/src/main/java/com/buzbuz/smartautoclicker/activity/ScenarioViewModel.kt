@@ -99,9 +99,9 @@ class ScenarioViewModel @Inject constructor(
 
     private val TAG = "Hz:ScenarioViewModel:"
     private val APP_KEY = "3c4f31f7f277ac27ec689b97b304da6d"
-    private val userId = 666888123456789
-    private val userId2 = 3333333
-    private val roomId = "123456789"
+    private val userId = 6668881234567890
+    private val userId2 = 98988
+    private val roomId = "12345678900"
     val sharedPreferencesUtil = SharedPreferencesUtil(context)
 
 

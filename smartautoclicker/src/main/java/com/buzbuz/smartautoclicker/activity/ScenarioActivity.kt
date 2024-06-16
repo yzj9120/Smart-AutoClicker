@@ -55,9 +55,7 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
         scenarioViewModel.stopScenario()
         scenarioViewModel.requestUserConsent(this)
         scenarioViewModel.createDumAndSmart();
-
         // 获取权限
-
         projectionActivityResult =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
