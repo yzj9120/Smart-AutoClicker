@@ -8,4 +8,4 @@
     android:canRetrieveWindowContent="true"
     android:notificationTimeout="2000"
     android:packageNames="com.openai.chatgpt"
-    android:settingsActivity='com.openai.chatgpt.MovementGranularity' />
+    android:settingsActivity='com.openai.chatgpt' />

@@ -17,33 +17,28 @@
 package com.buzbuz.smartautoclicker.activity
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ActivityManager
 import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Point
 import android.os.Build
 import android.util.Log
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-
 import androidx.core.content.PermissionChecker
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-
 import com.buzbuz.smartautoclicker.SmartAutoClickerService
-import com.buzbuz.smartautoclicker.VoiceActionUtil
 import com.buzbuz.smartautoclicker.core.base.identifier.DATABASE_ID_INSERTION
 import com.buzbuz.smartautoclicker.core.base.identifier.Identifier
-import com.buzbuz.smartautoclicker.core.base.identifier.IdentifierCreator
 import com.buzbuz.smartautoclicker.core.common.quality.domain.QualityRepository
 import com.buzbuz.smartautoclicker.core.domain.IRepository
 import com.buzbuz.smartautoclicker.core.domain.model.scenario.Scenario
 import com.buzbuz.smartautoclicker.core.dumb.domain.IDumbRepository
-import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbAction
 import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbScenario
 import com.buzbuz.smartautoclicker.core.dumb.engine.DumbEngine
 import com.buzbuz.smartautoclicker.feature.permissions.PermissionsController
@@ -52,8 +47,10 @@ import com.buzbuz.smartautoclicker.feature.permissions.model.PermissionOverlay
 import com.buzbuz.smartautoclicker.feature.permissions.model.PermissionPostNotification
 import com.buzbuz.smartautoclicker.feature.revenue.IRevenueRepository
 import com.buzbuz.smartautoclicker.feature.revenue.UserConsentState
+import com.buzbuz.smartautoclicker.utils.AppLaunchListener
+import com.buzbuz.smartautoclicker.utils.AppUtil
 import com.buzbuz.smartautoclicker.utils.SharedPreferencesUtil
-import com.gpt40.smartautoclicker.R
+import com.buzbuz.smartautoclicker.utils.VoiceActionUtil
 import com.netease.lava.nertc.sdk.NERtc
 import com.netease.lava.nertc.sdk.NERtcCallback
 import com.netease.lava.nertc.sdk.NERtcConstants
@@ -72,7 +69,6 @@ import com.netease.lava.nertc.sdk.stats.NERtcStatsObserver
 import com.netease.lava.nertc.sdk.stats.NERtcVideoRecvStats
 import com.netease.lava.nertc.sdk.stats.NERtcVideoSendStats
 import com.netease.lite.BuildConfig
-
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -87,7 +83,7 @@ import javax.inject.Inject
 /** AndroidViewModel for create/delete/list click scenarios from an LifecycleOwner. */
 @HiltViewModel
 class ScenarioViewModel @Inject constructor(
-    @ApplicationContext context: Context,
+    @ApplicationContext application: Context,
     private val smartRepository: IRepository,
     private val dumbRepository: IDumbRepository,
     private val revenueRepository: IRevenueRepository,
@@ -102,8 +98,10 @@ class ScenarioViewModel @Inject constructor(
     private val userId = 6668881234567890
     private val userId2 = 98988
     private val roomId = "12345678900"
-    val sharedPreferencesUtil = SharedPreferencesUtil(context)
+    val sharedPreferencesUtil = SharedPreferencesUtil(application)
 
+    @SuppressLint("StaticFieldLeak")
+    var mContext = application;
 
     /** Callback upon the availability of the [SmartAutoClickerService]. */
     private val serviceConnection: (SmartAutoClickerService.ILocalService?) -> Unit = { localService ->
@@ -126,7 +124,7 @@ class ScenarioViewModel @Inject constructor(
         SmartAutoClickerService.getLocalService(serviceConnection)
 
         notificationManager =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) context.getSystemService(NotificationManager::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) mContext.getSystemService(NotificationManager::class.java)
             else null
     }
 
@@ -150,7 +148,6 @@ class ScenarioViewModel @Inject constructor(
      */
     fun startPermissionFlowIfNeeded(activity: AppCompatActivity, onAllGranted: () -> Unit) {
         Log.d(TAG, "startPermissionFlowIfNeeded")
-
         permissionController.startPermissionsUiFlow(
             activity = activity,
             permissions = listOf(
@@ -171,21 +168,6 @@ class ScenarioViewModel @Inject constructor(
         qualityRepository.startTroubleshootingUiFlowIfNeeded(activity, onCompleted)
     }
 
-    /**
-     * Start the overlay UI and instantiates the detection objects for a given scenario.
-     *
-     * This requires the media projection permission code and its data intent, they both can be retrieved using the
-     * results of the activity intent provided by
-     * [android.media.projection.MediaProjectionManager.createScreenCaptureIntent] (this Intent shows the dialog
-     * warning about screen recording privacy). Any attempt to call this method without the correct screen capture
-     * intent result will leads to a crash.
-     *
-     * @param resultCode the result code provided by the screen capture intent activity result callback
-     * [android.app.Activity.onActivityResult]
-     * @param data the data intent provided by the screen capture intent activity result callback
-     * [android.app.Activity.onActivityResult]
-     * @param scenario the identifier of the scenario of clicks to be used for detection.
-     */
     fun loadSmartScenario(context: Context, resultCode: Int, data: Intent, scenario: Scenario): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val foregroundPermission =
@@ -220,6 +202,24 @@ class ScenarioViewModel @Inject constructor(
         bean?.let { clickerService?.startDumbScenario(it) };
     }
 
+    fun openGpt() {
+        val packageName = "com.openai.chatgpt" // 替换为你要打开的应用的包名
+        if (AppUtil.isAppInstalled(mContext, packageName)) {
+            AppUtil.openAppByPackageName(mContext, packageName, object : AppLaunchListener {
+                override fun onAppLaunchSuccess() {
+                    Toast.makeText(mContext, "ok", Toast.LENGTH_SHORT).show()
+                    startDumbScenario()
+                }
+
+                override fun onAppLaunchFailed() {
+                    Toast.makeText(mContext, "fail", Toast.LENGTH_SHORT).show()
+                }
+            })
+        } else {
+            Toast.makeText(mContext, "App is not installed", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     /**
      *
@@ -232,25 +232,23 @@ class ScenarioViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 val voiceActionUtil = VoiceActionUtil(dumbRepository, dumbEngine)
                 voiceActionUtil.executeVoiceActions()
-
-                createSmartScenario();
+                // createSmartScenario();
                 sharedPreferencesUtil.putBoolean("is_create_scenario", true)
             }
         }
     }
 
     private suspend fun createSmartScenario() {
-//        smartRepository.addScenario(
-//            Scenario(
-//                id = Identifier(databaseId = DATABASE_ID_INSERTION, tempId = 0L),
-//                name = "图形$DATABASE_ID_INSERTION",
-//                detectionQuality = 1200,
-//                randomize = false,
-//            )
-//        )
-//    }
-
+        smartRepository.addScenario(
+            Scenario(
+                id = Identifier(databaseId = DATABASE_ID_INSERTION, tempId = 0L),
+                name = "图形$DATABASE_ID_INSERTION",
+                detectionQuality = 1200,
+                randomize = false,
+            )
+        )
     }
+
 
     fun setRecordAudioParameters() {
         val formatMix = NERtcAudioFrameRequestFormat()
@@ -300,32 +298,41 @@ class ScenarioViewModel @Inject constructor(
             }
         }
         //设置质量透明回调
-//        NERtcEx.getInstance().setStatsObserver(object : NERtcStatsObserver {
-//            override fun onRtcStats(neRtcStats: NERtcStats) {
-//                //  Log.d(TAG, "onRtcStats:" + neRtcStats.toString())
+        NERtcEx.getInstance().setStatsObserver(object : NERtcStatsObserver {
+            override fun onRtcStats(neRtcStats: NERtcStats) {
+                //  Log.d(TAG, "onRtcStats:" + neRtcStats.toString())
+
+            }
+
+            override fun onLocalAudioStats(neRtcAudioSendStats: NERtcAudioSendStats) {
+
+                Log.d(TAG, "onLocalAudioStats:" + neRtcAudioSendStats.toString())
+            }
+
+            override fun onRemoteAudioStats(neRtcAudioRecvStats: Array<NERtcAudioRecvStats>) {
+//                Log.d(TAG, "onRemoteAudioStats:" + neRtcAudioRecvStats.size)
+//                val tmp = neRtcAudioRecvStats[0].layers[0]
+//                Log.d(TAG, "音量:" + tmp.volume)
+
+            }
+
+            override fun onLocalVideoStats(neRtcVideoSendStats: NERtcVideoSendStats) {}
+            override fun onRemoteVideoStats(neRtcVideoRecvStats: Array<NERtcVideoRecvStats>) {}
+            override fun onNetworkQuality(neRtcNetworkQualityInfos: Array<NERtcNetworkQualityInfo>) {
+//                val packageName = "com.openai.chatgpt" // 替换为你要检查的应用包名
+//                val isForeground = isActivityForeground(context, packageName)
 //
-//            }
-//
-//            override fun onLocalAudioStats(neRtcAudioSendStats: NERtcAudioSendStats) {
-//
-//                Log.d(TAG, "onLocalAudioStats:" + neRtcAudioSendStats.toString())
-//            }
-//
-//            override fun onRemoteAudioStats(neRtcAudioRecvStats: Array<NERtcAudioRecvStats>) {
-////                Log.d(TAG, "onRemoteAudioStats:" + neRtcAudioRecvStats.size)
-////                val tmp = neRtcAudioRecvStats[0].layers[0]
-////                Log.d(TAG, "音量:" + tmp.volume)
-//
-//            }
-//
-//            override fun onLocalVideoStats(neRtcVideoSendStats: NERtcVideoSendStats) {}
-//            override fun onRemoteVideoStats(neRtcVideoRecvStats: Array<NERtcVideoRecvStats>) {}
-//            override fun onNetworkQuality(neRtcNetworkQualityInfos: Array<NERtcNetworkQualityInfo>) {
-////                Log.d(TAG, "onNetworkQuality:" + neRtcNetworkQualityInfos.size)
-////                val tmp = neRtcNetworkQualityInfos[0]
-////                Log.d(TAG, "网络质量:" + NetQuality.getMsg(tmp.downStatus) + "---")
-//            }
-//        })
+//                if (isForeground) {
+//                    Log.d("ActivityStatus", "$packageName is in foreground")
+//                } else {
+//                    Log.d("ActivityStatus", "$packageName is not in foreground")
+//                }
+
+//                Log.d(TAG, "onNetworkQuality:" + neRtcNetworkQualityInfos.size)
+//                val tmp = neRtcNetworkQualityInfos[0]
+//                Log.d(TAG, "网络质量:" + NetQuality.getMsg(tmp.downStatus) + "---")
+            }
+        })
 
 //        NERtcEx.getInstance().setAudioFrameObserver(object : NERtcAudioFrameObserver {
 //            override fun onRecordFrame(neRtcAudioFrame: NERtcAudioFrame) {
@@ -389,6 +396,8 @@ class ScenarioViewModel @Inject constructor(
             NERtcConstants.AudioScenario.SPEECH, NERtcConstants.AudioProfile.MIDDLE_QUALITY
         )
 
+        NERtcEx.getInstance().setSpeakerphoneOn(false)
+
     }
 
     /**
@@ -426,9 +435,11 @@ class ScenarioViewModel @Inject constructor(
         Log.i(TAG, "onUserJoined userId: $userId ")
 
         if (userId.toInt() == userId2) {
-            startDumbScenario()
+            val tag = AppUtil.openPackage(mContext, "com.openai.chatgpt");
+            if(tag){
+                startDumbScenario()
+            }
         }
-
     }
 
     override fun onUserJoined(uid: Long, joinExtraInfo: NERtcUserJoinExtraInfo?) {

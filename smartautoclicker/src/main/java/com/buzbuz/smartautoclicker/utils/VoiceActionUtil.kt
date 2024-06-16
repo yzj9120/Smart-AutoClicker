@@ -1,4 +1,4 @@
-package com.buzbuz.smartautoclicker
+package com.buzbuz.smartautoclicker.utils
 
 import com.buzbuz.smartautoclicker.core.base.identifier.Identifier
 import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbAction

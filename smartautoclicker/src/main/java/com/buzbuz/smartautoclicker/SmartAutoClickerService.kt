@@ -30,12 +30,9 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-
-import com.buzbuz.smartautoclicker.SmartAutoClickerService.Companion.LOCAL_SERVICE_INSTANCE
-import com.buzbuz.smartautoclicker.SmartAutoClickerService.Companion.getLocalService
 import com.buzbuz.smartautoclicker.activity.ScenarioActivity
 import com.buzbuz.smartautoclicker.core.base.AndroidExecutor
 import com.buzbuz.smartautoclicker.core.base.Dumpable
@@ -52,12 +49,10 @@ import com.buzbuz.smartautoclicker.core.dumb.engine.DumbEngine
 import com.buzbuz.smartautoclicker.core.processing.domain.DetectionRepository
 import com.buzbuz.smartautoclicker.feature.revenue.IRevenueRepository
 import com.gpt40.smartautoclicker.R
-
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
-
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -114,6 +109,7 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
         fun stop()
         fun release()
         fun openOverlayManager(dumbScenario: DumbScenario);
+        fun gptLiner(dumbScenario: MutableList<NodeInfo>);
     }
 
     private val localService: LocalService?
@@ -130,16 +126,20 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
     ///
     @Inject
     lateinit var detectionRepository: DetectionRepository
+
     @Inject
     lateinit var dumbEngine: DumbEngine
 
     ////**管理单击条件的位图*/
     @Inject
     lateinit var bitmapManager: IBitmapManager
+
     @Inject
     lateinit var qualityRepository: QualityRepository
+
     @Inject
     lateinit var qualityMetricsMonitor: QualityMetricsMonitor
+
     @Inject
     lateinit var revenueRepository: IRevenueRepository
 
@@ -174,8 +174,7 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
                 }
                 requestFilterKeyEvents(true)
             },
-            onStop = {
-            },
+            onStop = {},
         )
 
         notificationActionsReceiver = createNotificationActionReceiver()
@@ -208,8 +207,7 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
     /**
      * 处理按键事件
      */
-    override fun onKeyEvent(event: KeyEvent?): Boolean =
-      false
+    override fun onKeyEvent(event: KeyEvent?): Boolean = false
 
     /**
      * 创建通知渠道
@@ -233,18 +231,14 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
      */
     private fun createNotification(): Notification {
         val intent = Intent(this, ScenarioActivity::class.java)
-        val icon =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) R.drawable.ic_notification_vector
-            else R.drawable.ic_notification
+        val icon = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) R.drawable.ic_notification_vector
+        else R.drawable.ic_notification
 
         val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle(getString(R.string.notification_title, currentScenarioName ?: ""))
             .setContentText(getString(R.string.notification_message))
             .setContentIntent(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE))
-            .setSmallIcon(icon)
-            .setCategory(Notification.CATEGORY_SERVICE)
-            .setOngoing(true)
-            .setLocalOnly(true)
+            .setSmallIcon(icon).setCategory(Notification.CATEGORY_SERVICE).setOngoing(true).setLocalOnly(true)
 
         localService?.let {
             builder.addAction(
@@ -262,18 +256,17 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
         return builder.build()
     }
 
-    private fun createNotificationActionReceiver(): BroadcastReceiver =
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                intent ?: return
-                val service = localService ?: return
+    private fun createNotificationActionReceiver(): BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            intent ?: return
+            val service = localService ?: return
 
-                when (intent.action) {
-                    INTENT_ACTION_TOGGLE_OVERLAY -> service.toggleOverlaysVisibility()
-                    INTENT_ACTION_STOP_SCENARIO -> service.stop()
-                }
+            when (intent.action) {
+                INTENT_ACTION_TOGGLE_OVERLAY -> service.toggleOverlaysVisibility()
+                INTENT_ACTION_STOP_SCENARIO -> service.stop()
             }
         }
+    }
 
     /**
      * 执行手势操作
@@ -326,10 +319,9 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
         if (writer == null) return
 
         writer.append("* SmartAutoClickerService:").println()
-        writer.append(Dumpable.DUMP_DISPLAY_TAB)
-            .append("- isStarted=").append("${(LOCAL_SERVICE_INSTANCE as? LocalService)?.isStarted ?: false}; ")
-            .append("scenarioName=").append("$currentScenarioName; ")
-            .println()
+        writer.append(Dumpable.DUMP_DISPLAY_TAB).append("- isStarted=")
+            .append("${(LOCAL_SERVICE_INSTANCE as? LocalService)?.isStarted ?: false}; ").append("scenarioName=")
+            .append("$currentScenarioName; ").println()
         Log.d(TAG, "dump: $writer")
         displayMetrics.dump(writer)
         bitmapManager.dump(writer)
@@ -343,6 +335,7 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
     override fun onInterrupt() { /* Unused */
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         /**
          * PackageName: com.openai.chatgpt; MovementGranularity
@@ -350,26 +343,35 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
          *  语音页面：Text 正在关联   (状态1: 加载汇中.....New Voice Mode coming soon  结束语音对话 停止)
          *
          */
-        Log.d(TAG, "onAccessibilityEvent：${event}")
+        Log.d(TAG,"===============")
+
+        nodeInfoList.clear()
         val rootNode = rootInActiveWindow
         rootNode?.let { traverseNode(it) }
+        Log.d(TAG,"nodeInfoList="+ nodeInfoList.toString())
+        localService?.gptLiner(nodeInfoList);
+
     }
-
-
-
+    val nodeInfoList = mutableListOf<NodeInfo>()
     private fun traverseNode(node: AccessibilityNodeInfo?) {
         if (node == null) return
 
-        Log.d(TAG, "Node  Text:${node.getText().toString()}  contentDescription:${node.contentDescription}......${node.viewIdResourceName}....${node.className}")
-        // 处理节点信息，例如打印节点文本
-//        if (node.getText() != null) {
-//            Log.d(TAG, "Node Text: " + node.getText().toString())
-//        }
+        val text = node.text?.toString() ?: ""
+        val contentDescription = node.contentDescription?.toString() ?: ""
+
+        if(text.isNotEmpty() || contentDescription.isNotEmpty()){
+            // 将节点信息添加到列表中
+            val info = NodeInfo(text, contentDescription)
+            nodeInfoList.add(info)
+        }
+        // 递归遍历子节点
         for (i in 0 until node.childCount) {
             traverseNode(node.getChild(i))
         }
     }
 }
+
+data class NodeInfo(val text: String, val contentDescription: String)
 
 /** Tag for the logs. */
 private const val TAG = "HUANGZHEN：SmartAutoClickerService"

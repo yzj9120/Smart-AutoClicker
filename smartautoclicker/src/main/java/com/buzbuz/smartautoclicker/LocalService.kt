@@ -77,20 +77,7 @@ class LocalService(
         }
     }
 
-    /**
-     * Start the overlay UI and instantiates the detection objects.
-     *
-     * This requires the media projection permission code and its data intent, they both can be retrieved using the
-     * results of the activity intent provided by [MediaProjectionManager.createScreenCaptureIntent] (this Intent
-     * shows the dialog warning about screen recording privacy). Any attempt to call this method without the
-     * correct screen capture intent result will leads to a crash.
-     *
-     * @param resultCode the result code provided by the screen capture intent activity result callback
-     * [android.app.Activity.onActivityResult]
-     * @param data the data intent provided by the screen capture intent activity result callback
-     * [android.app.Activity.onActivityResult]
-     * @param scenario the identifier of the scenario of clicks to be used for detection.
-     */
+
     @SuppressLint("ServiceCast")
     override fun startSmartScenario(resultCode: Int, data: Intent, scenario: Scenario) {
 
@@ -112,6 +99,8 @@ class LocalService(
             // If we start too quickly, there is a chance of crash because the service isn't in foreground state yet
             // That's not really an issue as the user just clicked the permission button and the activity is closing
             delay(1000)
+
+            Log.d(TAG, "意图：$resultCode.......daata=$data")
             detectionRepository.startScreenRecord(
                 context = context,
                 resultCode = resultCode,
@@ -160,6 +149,17 @@ class LocalService(
                 newOverlay = DumbMainMenu(dumbScenario.id) { stop() },
             )
         }
+    }
+
+    override fun gptLiner(nodeInfoList: MutableList<NodeInfo>) {
+        if (nodeInfoList.contains(NodeInfo("", "听写,开始语音对话,开始新聊天,编辑菜单"))) {
+            println("列表中包含文本为 '聊天的节点信息")
+        } else if (nodeInfoList.contains(NodeInfo("正在关联", "结束语音对话，停止"))) {
+            println("列表中包含文本为 '语言的节点信息")
+        }else{
+            println("列表中包含文本为 '未知")
+        }
+
     }
 
     fun onKyEvent(event: KeyEvent?): Boolean {

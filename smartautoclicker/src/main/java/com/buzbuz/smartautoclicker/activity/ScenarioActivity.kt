@@ -2,6 +2,7 @@ package com.buzbuz.smartautoclicker.activity
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
 import android.media.projection.MediaProjectionManager
@@ -78,7 +79,6 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
         scenarioViewModel.setLocalAudioEnable(true)
         scenarioViewModel.setupNERtc(applicationContext)
         scenarioViewModel.joinChannel()
-
 
     }
     private fun requestPermissionsIfNeeded(context: Activity?) {
