@@ -87,4 +87,16 @@ dependencies {
     implementation(project(":feature:smart-config"))
     implementation(project(":feature:smart-debugging"))
     implementation(project(":feature:dumb-config"))
+    implementation(libs.okhttp3.okhttp)
+    implementation(libs.logging.interceptor)
+    //retrofit
+    api(libs.retrofit)
+    implementation(libs.converter.gson)
+
+
+//    implementation("com.squareup.okhttp3:okhttp:4.9.1")
+//    implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
+//    //retrofit
+//    api("com.squareup.retrofit2:retrofit:2.9.0")
+//    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 }

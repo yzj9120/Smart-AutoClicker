@@ -35,7 +35,6 @@ class SmartAutoClickerApplication : Application() {
         NIMClient.init(this, loginInfo(), options());
         // 如果提供用户信息，将同时进行自动登录。如果当前还没有登录用户，请传入null。
 
-
         val info = LoginInfo("","")
         val callback: RequestCallback<LoginInfo?> = object : RequestCallback<LoginInfo?> {
             override fun onSuccess(param: LoginInfo?) {
