@@ -5,6 +5,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.Response
 import java.io.IOException
 
 sealed class Result<out T> {
@@ -36,7 +42,7 @@ class NetworkRequestHelper(
     suspend fun post(url: String, jsonBody: String): Result<String> {
         return withContext(dispatcher) {
             try {
-                val body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonBody)
+                val body = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), jsonBody)
                 val request = Request.Builder()
                     .url(url)
                     .post(body)
