@@ -11,6 +11,7 @@ class FirstViewModel(private val networkRequestHelper: NetworkRequestHelper) : V
     val responseState: StateFlow<Result<String>> get() = _responseState
 
     fun fetchData(url: String) {
+
         viewModelScope.launch {
             _responseState.value = Result.Loading
             val result = networkRequestHelper.get(url)

@@ -2,16 +2,14 @@ package com.buzbuz.smartautoclicker.activity
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
-import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
+import android.media.AudioManager
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,14 +17,12 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-
 import com.buzbuz.smartautoclicker.activity.list.ScenarioListFragment
 import com.buzbuz.smartautoclicker.activity.list.ScenarioListUiState
 import com.buzbuz.smartautoclicker.core.base.extensions.delayDrawUntil
 import com.buzbuz.smartautoclicker.core.domain.model.scenario.Scenario
 import com.buzbuz.smartautoclicker.core.dumb.domain.model.DumbScenario
 import com.buzbuz.smartautoclicker.feature.revenue.UserConsentState
-
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.gpt40.smartautoclicker.R
 import com.netease.lava.nertc.sdk.NERtc
@@ -49,6 +45,9 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
 
     /** 用户点击的场景。 */
     private var requestedItem: ScenarioListUiState.Item? = null
+
+    private var audioManager: AudioManager? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,9 +73,15 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
             scenarioViewModel.userConsentState.value != UserConsentState.UNKNOWN
         }
         requestPermissionsIfNeeded(this);
-        scenarioViewModel.setRecordAudioParameters()
-        scenarioViewModel.setPlaybackAudioParameters()
-        scenarioViewModel.setLocalAudioEnable(true)
+
+//
+//        audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+////
+////        // 设置音量控制流类型为音乐流
+//        volumeControlStream =12;
+//        scenarioViewModel.setRecordAudioParameters()
+//        scenarioViewModel.setPlaybackAudioParameters()
+//        scenarioViewModel.setLocalAudioEnable(false)
         scenarioViewModel.setupNERtc(applicationContext)
         scenarioViewModel.joinChannel()
 

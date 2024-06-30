@@ -19,7 +19,6 @@ package com.buzbuz.smartautoclicker.activity
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.ActivityManager
 import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
@@ -47,7 +46,6 @@ import com.buzbuz.smartautoclicker.feature.permissions.model.PermissionOverlay
 import com.buzbuz.smartautoclicker.feature.permissions.model.PermissionPostNotification
 import com.buzbuz.smartautoclicker.feature.revenue.IRevenueRepository
 import com.buzbuz.smartautoclicker.feature.revenue.UserConsentState
-import com.buzbuz.smartautoclicker.utils.AppLaunchListener
 import com.buzbuz.smartautoclicker.utils.AppUtil
 import com.buzbuz.smartautoclicker.utils.SharedPreferencesUtil
 import com.buzbuz.smartautoclicker.utils.VoiceActionUtil
@@ -61,13 +59,6 @@ import com.netease.lava.nertc.sdk.NERtcUserJoinExtraInfo
 import com.netease.lava.nertc.sdk.NERtcUserLeaveExtraInfo
 import com.netease.lava.nertc.sdk.audio.NERtcAudioFrameOpMode
 import com.netease.lava.nertc.sdk.audio.NERtcAudioFrameRequestFormat
-import com.netease.lava.nertc.sdk.stats.NERtcAudioRecvStats
-import com.netease.lava.nertc.sdk.stats.NERtcAudioSendStats
-import com.netease.lava.nertc.sdk.stats.NERtcNetworkQualityInfo
-import com.netease.lava.nertc.sdk.stats.NERtcStats
-import com.netease.lava.nertc.sdk.stats.NERtcStatsObserver
-import com.netease.lava.nertc.sdk.stats.NERtcVideoRecvStats
-import com.netease.lava.nertc.sdk.stats.NERtcVideoSendStats
 import com.netease.lite.BuildConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -201,6 +192,7 @@ class ScenarioViewModel @Inject constructor(
     fun startDumbScenario() {
         bean?.let { clickerService?.startDumbScenario(it) };
     }
+
     /**
      *
      * 一键添加数据 ：
@@ -233,22 +225,30 @@ class ScenarioViewModel @Inject constructor(
     fun setRecordAudioParameters() {
         val formatMix = NERtcAudioFrameRequestFormat()
         //单声道、双声道
+        //单声道、双声道
         formatMix.channels = 1
+        //采样率
         //采样率
         formatMix.sampleRate = 32000
         //读写权限
-        formatMix.opMode = NERtcAudioFrameOpMode.kNERtcAudioFrameOpModeReadWrite
+        //读写权限
+        formatMix.opMode = NERtcAudioFrameOpMode.kNERtcAudioFrameOpModeReadOnly
         NERtcEx.getInstance().setRecordingAudioFrameParameters(formatMix)
+
+
     }
 
     fun setPlaybackAudioParameters() {
         val formatMix = NERtcAudioFrameRequestFormat()
         //单声道、双声道
+        //单声道、双声道
         formatMix.channels = 1
+        //采样率
         //采样率
         formatMix.sampleRate = 32000
         //读写权限
-        formatMix.opMode = NERtcAudioFrameOpMode.kNERtcAudioFrameOpModeReadWrite
+        //读写权限
+        formatMix.opMode = NERtcAudioFrameOpMode.kNERtcAudioFrameOpModeReadOnly
         NERtcEx.getInstance().setPlaybackAudioFrameParameters(formatMix)
     }
 
@@ -278,41 +278,41 @@ class ScenarioViewModel @Inject constructor(
             }
         }
         //设置质量透明回调
-        NERtcEx.getInstance().setStatsObserver(object : NERtcStatsObserver {
-            override fun onRtcStats(neRtcStats: NERtcStats) {
-                //  Log.d(TAG, "onRtcStats:" + neRtcStats.toString())
-
-            }
-
-            override fun onLocalAudioStats(neRtcAudioSendStats: NERtcAudioSendStats) {
-
-                Log.d(TAG, "onLocalAudioStats:" + neRtcAudioSendStats.toString())
-            }
-
-            override fun onRemoteAudioStats(neRtcAudioRecvStats: Array<NERtcAudioRecvStats>) {
-//                Log.d(TAG, "onRemoteAudioStats:" + neRtcAudioRecvStats.size)
-//                val tmp = neRtcAudioRecvStats[0].layers[0]
-//                Log.d(TAG, "音量:" + tmp.volume)
-
-            }
-
-            override fun onLocalVideoStats(neRtcVideoSendStats: NERtcVideoSendStats) {}
-            override fun onRemoteVideoStats(neRtcVideoRecvStats: Array<NERtcVideoRecvStats>) {}
-            override fun onNetworkQuality(neRtcNetworkQualityInfos: Array<NERtcNetworkQualityInfo>) {
-//                val packageName = "com.openai.chatgpt" // 替换为你要检查的应用包名
-//                val isForeground = isActivityForeground(context, packageName)
+//        NERtcEx.getInstance().setStatsObserver(object : NERtcStatsObserver {
+//            override fun onRtcStats(neRtcStats: NERtcStats) {
+//                //  Log.d(TAG, "onRtcStats:" + neRtcStats.toString())
 //
-//                if (isForeground) {
-//                    Log.d("ActivityStatus", "$packageName is in foreground")
-//                } else {
-//                    Log.d("ActivityStatus", "$packageName is not in foreground")
-//                }
-
-//                Log.d(TAG, "onNetworkQuality:" + neRtcNetworkQualityInfos.size)
-//                val tmp = neRtcNetworkQualityInfos[0]
-//                Log.d(TAG, "网络质量:" + NetQuality.getMsg(tmp.downStatus) + "---")
-            }
-        })
+//            }
+//
+//            override fun onLocalAudioStats(neRtcAudioSendStats: NERtcAudioSendStats) {
+//
+//                Log.d(TAG, "onLocalAudioStats:" + neRtcAudioSendStats.toString())
+//            }
+//
+//            override fun onRemoteAudioStats(neRtcAudioRecvStats: Array<NERtcAudioRecvStats>) {
+////                Log.d(TAG, "onRemoteAudioStats:" + neRtcAudioRecvStats.size)
+////                val tmp = neRtcAudioRecvStats[0].layers[0]
+////                Log.d(TAG, "音量:" + tmp.volume)
+//
+//            }
+//
+//            override fun onLocalVideoStats(neRtcVideoSendStats: NERtcVideoSendStats) {}
+//            override fun onRemoteVideoStats(neRtcVideoRecvStats: Array<NERtcVideoRecvStats>) {}
+//            override fun onNetworkQuality(neRtcNetworkQualityInfos: Array<NERtcNetworkQualityInfo>) {
+////                val packageName = "com.openai.chatgpt" // 替换为你要检查的应用包名
+////                val isForeground = isActivityForeground(context, packageName)
+////
+////                if (isForeground) {
+////                    Log.d("ActivityStatus", "$packageName is in foreground")
+////                } else {
+////                    Log.d("ActivityStatus", "$packageName is not in foreground")
+////                }
+//
+////                Log.d(TAG, "onNetworkQuality:" + neRtcNetworkQualityInfos.size)
+////                val tmp = neRtcNetworkQualityInfos[0]
+////                Log.d(TAG, "网络质量:" + NetQuality.getMsg(tmp.downStatus) + "---")
+//            }
+//        })
 
 //        NERtcEx.getInstance().setAudioFrameObserver(object : NERtcAudioFrameObserver {
 //            override fun onRecordFrame(neRtcAudioFrame: NERtcAudioFrame) {
@@ -363,6 +363,9 @@ class ScenarioViewModel @Inject constructor(
 //                )
 //            }
 //        })
+        setLocalAudioEnable(false)
+
+
     }
 
     /**
@@ -371,13 +374,20 @@ class ScenarioViewModel @Inject constructor(
      * @param enable
      */
     fun setLocalAudioEnable(enable: Boolean) {
-        NERtcEx.getInstance().enableLocalAudio(enable)
+        //开启或关闭本地音频采集和发送。
+        NERtcEx.getInstance().enableLocalAudio(true)
+       //设置播放设备静音
+        NERtcEx.getInstance().setPlayoutDeviceMute(true);
+        //设置播放设备取消静音
+       // NERtcEx.getInstance().setPlayoutDeviceMute(false);
         NERtc.getInstance().setAudioProfile(
             NERtcConstants.AudioScenario.SPEECH, NERtcConstants.AudioProfile.MIDDLE_QUALITY
         )
-
-        NERtcEx.getInstance().setSpeakerphoneOn(false)
-
+        //NERtcEx.getInstance().setSpeakerphoneOn(false)
+        NERtcEx.getInstance().adjustChannelPlaybackSignalVolume(12)
+        NERtcEx.getInstance().adjustLoopBackRecordingSignalVolume(12)
+        NERtcEx.getInstance().adjustPlaybackSignalVolume(12)
+        //NERtcEx.getInstance().setRemoteHighPriorityAudioStream(true,12)
     }
 
     /**
@@ -388,7 +398,16 @@ class ScenarioViewModel @Inject constructor(
      */
     fun joinChannel() {
         Log.i(TAG, "joinChannel userId: $userId")
-        NERtcEx.getInstance().joinChannel(null, roomId, userId)
+       // NERtcEx.getInstance().joinChannel(null, roomId, userId)
+       //
+
+
+        NERtcEx.getInstance().setChannelProfile(NERtcConstants.RTCChannelProfile.COMMUNICATION)
+        NERtcEx.getInstance().joinChannel("", roomId, userId)
+//        val ret = NERtcEx.getInstance().enableSuperResolution(false)
+        setRecordAudioParameters()
+        setPlaybackAudioParameters()
+        AudioReceiverDecoder().setMediaComm()
     }
 
     private fun leaveChannel(): Boolean {
@@ -416,7 +435,7 @@ class ScenarioViewModel @Inject constructor(
 
         if (userId.toInt() == userId2) {
             val tag = AppUtil.openPackage(mContext, "com.openai.chatgpt");
-            if(tag){
+            if (tag) {
                 startDumbScenario()
             }
         }
