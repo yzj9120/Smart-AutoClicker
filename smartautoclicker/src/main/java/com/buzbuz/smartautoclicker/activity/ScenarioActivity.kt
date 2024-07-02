@@ -46,7 +46,6 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
     /** 用户点击的场景。 */
     private var requestedItem: ScenarioListUiState.Item? = null
 
-    private var audioManager: AudioManager? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,18 +72,6 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
             scenarioViewModel.userConsentState.value != UserConsentState.UNKNOWN
         }
         requestPermissionsIfNeeded(this);
-
-//
-//        audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
-////
-////        // 设置音量控制流类型为音乐流
-//        volumeControlStream =12;
-//        scenarioViewModel.setRecordAudioParameters()
-//        scenarioViewModel.setPlaybackAudioParameters()
-//        scenarioViewModel.setLocalAudioEnable(false)
-        scenarioViewModel.setupNERtc(applicationContext)
-        scenarioViewModel.joinChannel()
-
     }
     private fun requestPermissionsIfNeeded(context: Activity?) {
         val missedPermissions = NERtc.checkPermission(context)
@@ -97,6 +84,11 @@ class ScenarioActivity : AppCompatActivity(), ScenarioListFragment.Listener {
     override fun onResume() {
         super.onResume()
         scenarioViewModel.refreshPurchaseState()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scenarioViewModel.onDestroy()
     }
 
     override fun startScenario(item: ScenarioListUiState.Item) {

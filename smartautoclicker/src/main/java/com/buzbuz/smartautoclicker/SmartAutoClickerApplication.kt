@@ -32,30 +32,30 @@ class SmartAutoClickerApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         DynamicColors.applyToActivitiesIfAvailable(this)
-        NIMClient.init(this, loginInfo(), options());
-        // 如果提供用户信息，将同时进行自动登录。如果当前还没有登录用户，请传入null。
-
-        val info = LoginInfo("","")
-        val callback: RequestCallback<LoginInfo?> = object : RequestCallback<LoginInfo?> {
-            override fun onSuccess(param: LoginInfo?) {
-              //  LogUtil.i(TAG, "login success")
-                // your code
-            }
-
-            override fun onFailed(code: Int) {
-                if (code == 302) {
-                  //  LogUtil.i(TAG, "账号密码错误")
-                    // your code
-                } else {
-                    // your code
-                }
-            }
-
-            override fun onException(exception: Throwable) {
-                // your code
-            }
-        }
-        NIMClient.getService(AuthService::class.java).login(info).setCallback(callback)
+//        NIMClient.init(this, loginInfo(), options());
+//        // 如果提供用户信息，将同时进行自动登录。如果当前还没有登录用户，请传入null。
+//
+//        val info = LoginInfo("","")
+//        val callback: RequestCallback<LoginInfo?> = object : RequestCallback<LoginInfo?> {
+//            override fun onSuccess(param: LoginInfo?) {
+//              //  LogUtil.i(TAG, "login success")
+//                // your code
+//            }
+//
+//            override fun onFailed(code: Int) {
+//                if (code == 302) {
+//                  //  LogUtil.i(TAG, "账号密码错误")
+//                    // your code
+//                } else {
+//                    // your code
+//                }
+//            }
+//
+//            override fun onException(exception: Throwable) {
+//                // your code
+//            }
+//        }
+//        NIMClient.getService(AuthService::class.java).login(info).setCallback(callback)
     }
 
 
